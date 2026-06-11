@@ -1,0 +1,13 @@
+namespace QLNongSan.schemas
+{
+    public class NhanVienDTO
+    {
+        public string NgaySinh { get; set; }
+        public string GioiTinh { get; set; }
+        public string SDT { get; set; }
+        public string Email { get; set; }
+        public string ChucVu { get; set; }
+        public string HopDong { get; set; }
+        public string TrangThai { get; set; }
+    }
+}

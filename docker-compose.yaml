@@ -1,0 +1,12 @@
+services:
+  admin-db:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    ports:
+      - 14331:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Quanlynongsan@123
+      - MSSQL_PID=Developer
+networks:
+  admin-network:
+    driver: bridge
