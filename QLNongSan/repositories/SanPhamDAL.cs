@@ -9,8 +9,8 @@ namespace QLNongSan.repositories
     {
         private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
 
-        // Lấy toàn bộ sản phẩm
-        public DataTable GetAllSanPham()
+        // Lấy toàn bộ sản phẩm (Form gọi method này)
+        public DataTable GetListSanPham()
         {
             DataTable dt = new DataTable();
             string query = @"SELECT MaSP as [Mã SP], TenSP as [Tên sản phẩm], DVT as [ĐVT],
@@ -25,17 +25,16 @@ namespace QLNongSan.repositories
         // Thêm sản phẩm
         public string AddSanPham(SanPhamDTO sp)
         {
-            if (string.IsNullOrWhiteSpace(sp.MaSP) || string.IsNullOrWhiteSpace(sp.TenSP))
-                return "Vui lòng nhập Mã và Tên sản phẩm!";
+            if (string.IsNullOrWhiteSpace(sp.TenSP))
+                return "Vui lòng nhập Tên sản phẩm!";
 
-            string query = @"INSERT INTO SanPham (MaSP, TenSP, DVT, GiaBan, SoLuongTon, MaLoai)
-                             VALUES (@MaSP, @TenSP, @DVT, @GiaBan, @SoLuongTon, @MaLoai)";
+            string query = @"INSERT INTO SanPham (TenSP, DVT, GiaBan, SoLuongTon, MaLoai)
+                     VALUES (@TenSP, @DVT, @GiaBan, @SoLuongTon, @MaLoai)";
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
                 {
-                    cmd.Parameters.AddWithValue("@MaSP", sp.MaSP);
                     cmd.Parameters.AddWithValue("@TenSP", sp.TenSP);
                     cmd.Parameters.AddWithValue("@DVT", sp.DVT ?? "");
                     cmd.Parameters.AddWithValue("@GiaBan", sp.GiaBan);
@@ -99,11 +98,6 @@ namespace QLNongSan.repositories
             using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 adapter.Fill(dt);
             return dt;
-        }
-
-        internal object? GetListSanPham()
-        {
-            throw new NotImplementedException();
         }
     }
 }

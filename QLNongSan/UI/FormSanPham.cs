@@ -1,37 +1,51 @@
-﻿using System;
+﻿using QLNongSan.repositories;
+using QLNongSan.schemas;
+using System;
+using System.Data;
 using System.Windows.Forms;
-using QLNongSan.repositories; // Khai báo tầng xử lý database
-using QLNongSan.schemas;      // Khai báo tầng đối tượng dữ liệu
 
 namespace QLNongSan.UI
 {
     public partial class FormSanPham : Form
     {
-        // Khai báo đối tượng DAL để tương tác với cơ sở dữ liệu
         private SanPhamDAL sanPhamDAL = new SanPhamDAL();
 
         public FormSanPham()
         {
             InitializeComponent();
-
-            // Đăng ký các sự kiện từ code để đảm bảo nút bấm và Form hoạt động
             this.Load += FormSanPham_Load;
             this.btnThem.Click += btnThem_Click;
             this.btnSua.Click += btnSua_Click;
             this.btnXoa.Click += btnXoa_Click;
             this.btnLamMoi.Click += btnLamMoi_Click;
+            this.dgvSanPham.CellClick += dgvSanPham_CellClick;
         }
 
-        // 1. Sự kiện Load Form - Tự động tải dữ liệu và căn chỉnh bảng
         private void FormSanPham_Load(object sender, EventArgs e)
         {
             HienThiDanhSachSanPham();
-
-            // Tự động căn chỉnh các cột lấp đầy khoảng trống của DataGridView
+            LoadLoaiHang();
+            txtMaSP.ReadOnly = true;
+            txtMaSP.BackColor = Color.LightGray;
             dgvSanPham.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
-        // Hàm tải dữ liệu lên DataGridView
+        private void LoadLoaiHang()
+        {
+            try
+            {
+                var dt = sanPhamDAL.GetDanhSachLoaiHang();
+                cboLoaiHang.DataSource = dt;
+                cboLoaiHang.DisplayMember = "TenLoai";
+                cboLoaiHang.ValueMember = "MaLoai";
+                cboLoaiHang.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải loại hàng: " + ex.Message, "Lỗi");
+            }
+        }
+
         private void HienThiDanhSachSanPham()
         {
             try
@@ -44,31 +58,53 @@ namespace QLNongSan.UI
             }
         }
 
-        // 2. Sự kiện nút THÊM
+        // Click vào dòng trên bảng → tự điền vào form
+        private void dgvSanPham_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var row = dgvSanPham.Rows[e.RowIndex];
+            txtMaSP.Text = row.Cells["Mã SP"].Value?.ToString();
+            txtTenSP.Text = row.Cells["Tên sản phẩm"].Value?.ToString();
+            txtDVT.Text = row.Cells["ĐVT"].Value?.ToString();
+            txtGiaBan.Text = row.Cells["Giá bán"].Value?.ToString();
+            txtSoLuongTon.Text = row.Cells["Tồn kho"].Value?.ToString();
+
+            // Chọn đúng loại hàng trong ComboBox
+            string tenLoai = row.Cells["Loại hàng"].Value?.ToString();
+            foreach (DataRowView item in cboLoaiHang.Items)
+            {
+                if (item["TenLoai"].ToString() == tenLoai)
+                {
+                    cboLoaiHang.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
+        // Nút THÊM
         private void btnThem_Click(object sender, EventArgs e)
         {
             try
             {
-                if (string.IsNullOrEmpty(txtMaSP.Text))
+                if (string.IsNullOrWhiteSpace(txtTenSP.Text))
                 {
-                    MessageBox.Show("Vui lòng nhập mã sản phẩm!");
+                    MessageBox.Show("Vui lòng nhập Tên sản phẩm!", "Thông báo");
                     return;
                 }
 
                 SanPhamDTO sp = new SanPhamDTO
                 {
-                    MaSP = txtMaSP.Text.Trim(),
                     TenSP = txtTenSP.Text.Trim(),
-                    LoaiHang = cboLoaiHang.Text,
+                    DVT = txtDVT.Text.Trim(),
+                    MaLoai = cboLoaiHang.SelectedValue?.ToString() ?? "",
                     SoLuongTon = int.Parse(txtSoLuongTon.Text.Trim()),
                     GiaBan = decimal.Parse(txtGiaBan.Text.Trim())
                 };
 
                 string ketQua = sanPhamDAL.AddSanPham(sp);
-
                 if (ketQua == "SUCCESS")
                 {
-                    MessageBox.Show("Thêm sản phẩm mới thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     HienThiDanhSachSanPham();
                     btnLamMoi.PerformClick();
                 }
@@ -87,14 +123,14 @@ namespace QLNongSan.UI
             }
         }
 
-        // 3. Sự kiện nút SỬA
+        // Nút SỬA
         private void btnSua_Click(object sender, EventArgs e)
         {
             try
             {
                 if (string.IsNullOrEmpty(txtMaSP.Text))
                 {
-                    MessageBox.Show("Vui lòng chọn hoặc nhập mã sản phẩm cần sửa!", "Thông báo");
+                    MessageBox.Show("Vui lòng chọn một sản phẩm từ bảng!", "Thông báo");
                     return;
                 }
 
@@ -102,14 +138,13 @@ namespace QLNongSan.UI
                 {
                     MaSP = txtMaSP.Text.Trim(),
                     TenSP = txtTenSP.Text.Trim(),
-                    LoaiHang = cboLoaiHang.Text,
+                    DVT = txtDVT.Text.Trim(),
+                    MaLoai = cboLoaiHang.SelectedValue?.ToString() ?? "",
                     SoLuongTon = int.Parse(txtSoLuongTon.Text.Trim()),
                     GiaBan = decimal.Parse(txtGiaBan.Text.Trim())
                 };
 
-                // Giả định bạn đã viết hàm UpdateSanPham trong SanPhamDAL
                 string ketQua = sanPhamDAL.UpdateSanPham(sp);
-
                 if (ketQua == "SUCCESS")
                 {
                     MessageBox.Show("Cập nhật sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -127,7 +162,7 @@ namespace QLNongSan.UI
             }
         }
 
-        // 4. Sự kiện nút XÓA
+        // Nút XÓA
         private void btnXoa_Click(object sender, EventArgs e)
         {
             try
@@ -135,16 +170,14 @@ namespace QLNongSan.UI
                 string maSP = txtMaSP.Text.Trim();
                 if (string.IsNullOrEmpty(maSP))
                 {
-                    MessageBox.Show("Vui lòng nhập mã sản phẩm cần xóa!", "Thông báo");
+                    MessageBox.Show("Vui lòng chọn một sản phẩm từ bảng!", "Thông báo");
                     return;
                 }
 
                 DialogResult dr = MessageBox.Show("Bạn có chắc chắn muốn xóa sản phẩm này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dr == DialogResult.Yes)
                 {
-                    // Giả định bạn đã viết hàm DeleteSanPham trong SanPhamDAL
                     string ketQua = sanPhamDAL.DeleteSanPham(maSP);
-
                     if (ketQua == "SUCCESS")
                     {
                         MessageBox.Show("Xóa sản phẩm thành công!", "Thông báo");
@@ -163,15 +196,16 @@ namespace QLNongSan.UI
             }
         }
 
-        // 5. Sự kiện nút LÀM MỚI
+        // Nút LÀM MỚI
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             txtMaSP.Clear();
             txtTenSP.Clear();
-            cboLoaiHang.SelectedIndex = -1;
+            txtDVT.Clear();
             txtSoLuongTon.Clear();
             txtGiaBan.Clear();
-            txtMaSP.Focus();
+            cboLoaiHang.SelectedIndex = -1;
+            txtTenSP.Focus();
         }
     }
 }

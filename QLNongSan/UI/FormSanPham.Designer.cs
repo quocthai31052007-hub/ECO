@@ -2,15 +2,8 @@
 {
     partial class FormSanPham
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,10 +15,6 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
@@ -37,9 +26,11 @@
             btnThem = new Button();
             cboLoaiHang = new ComboBox();
             txtGiaBan = new TextBox();
+            txtDVT = new TextBox();
             txtTenSP = new TextBox();
             txtSoLuongTon = new TextBox();
             txtMaSP = new TextBox();
+            label7 = new Label();
             label6 = new Label();
             label5 = new Label();
             label4 = new Label();
@@ -72,9 +63,11 @@
             groupBox1.Controls.Add(btnThem);
             groupBox1.Controls.Add(cboLoaiHang);
             groupBox1.Controls.Add(txtGiaBan);
+            groupBox1.Controls.Add(txtDVT);
             groupBox1.Controls.Add(txtTenSP);
             groupBox1.Controls.Add(txtSoLuongTon);
             groupBox1.Controls.Add(txtMaSP);
+            groupBox1.Controls.Add(label7);
             groupBox1.Controls.Add(label6);
             groupBox1.Controls.Add(label5);
             groupBox1.Controls.Add(label4);
@@ -94,7 +87,7 @@
             btnSua.BackColor = Color.FromArgb(192, 255, 192);
             btnSua.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnSua.ForeColor = Color.Black;
-            btnSua.Location = new Point(791, 229);
+            btnSua.Location = new Point(1164, 160);
             btnSua.Name = "btnSua";
             btnSua.Size = new Size(137, 52);
             btnSua.TabIndex = 14;
@@ -106,7 +99,7 @@
             btnXoa.BackColor = Color.FromArgb(192, 255, 192);
             btnXoa.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnXoa.ForeColor = Color.Black;
-            btnXoa.Location = new Point(959, 229);
+            btnXoa.Location = new Point(1004, 240);
             btnXoa.Name = "btnXoa";
             btnXoa.Size = new Size(137, 52);
             btnXoa.TabIndex = 13;
@@ -118,7 +111,7 @@
             btnLamMoi.BackColor = Color.FromArgb(192, 255, 192);
             btnLamMoi.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnLamMoi.ForeColor = Color.Black;
-            btnLamMoi.Location = new Point(1130, 229);
+            btnLamMoi.Location = new Point(1164, 237);
             btnLamMoi.Name = "btnLamMoi";
             btnLamMoi.Size = new Size(137, 52);
             btnLamMoi.TabIndex = 12;
@@ -130,7 +123,7 @@
             btnThem.BackColor = Color.FromArgb(192, 255, 192);
             btnThem.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnThem.ForeColor = Color.Black;
-            btnThem.Location = new Point(620, 229);
+            btnThem.Location = new Point(1004, 160);
             btnThem.Name = "btnThem";
             btnThem.Size = new Size(137, 52);
             btnThem.TabIndex = 11;
@@ -142,7 +135,7 @@
             cboLoaiHang.DropDownStyle = ComboBoxStyle.DropDownList;
             cboLoaiHang.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cboLoaiHang.FormattingEnabled = true;
-            cboLoaiHang.Location = new Point(262, 152);
+            cboLoaiHang.Location = new Point(220, 165);
             cboLoaiHang.Name = "cboLoaiHang";
             cboLoaiHang.Size = new Size(261, 45);
             cboLoaiHang.TabIndex = 10;
@@ -150,15 +143,23 @@
             // txtGiaBan
             // 
             txtGiaBan.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtGiaBan.Location = new Point(262, 229);
+            txtGiaBan.Location = new Point(220, 237);
             txtGiaBan.Name = "txtGiaBan";
             txtGiaBan.Size = new Size(261, 43);
             txtGiaBan.TabIndex = 9;
             // 
+            // txtDVT
+            // 
+            txtDVT.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            txtDVT.Location = new Point(710, 245);
+            txtDVT.Name = "txtDVT";
+            txtDVT.Size = new Size(261, 43);
+            txtDVT.TabIndex = 8;
+            // 
             // txtTenSP
             // 
             txtTenSP.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtTenSP.Location = new Point(846, 75);
+            txtTenSP.Location = new Point(710, 81);
             txtTenSP.Name = "txtTenSP";
             txtTenSP.Size = new Size(261, 43);
             txtTenSP.TabIndex = 7;
@@ -167,7 +168,7 @@
             // 
             txtSoLuongTon.BackColor = Color.White;
             txtSoLuongTon.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtSoLuongTon.Location = new Point(846, 152);
+            txtSoLuongTon.Location = new Point(710, 167);
             txtSoLuongTon.Name = "txtSoLuongTon";
             txtSoLuongTon.Size = new Size(261, 43);
             txtSoLuongTon.TabIndex = 6;
@@ -175,16 +176,26 @@
             // txtMaSP
             // 
             txtMaSP.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtMaSP.Location = new Point(262, 75);
+            txtMaSP.Location = new Point(220, 76);
             txtMaSP.Name = "txtMaSP";
             txtMaSP.Size = new Size(261, 43);
             txtMaSP.TabIndex = 5;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label7.Location = new Point(517, 245);
+            label7.Name = "label7";
+            label7.Size = new Size(196, 38);
+            label7.TabIndex = 15;
+            label7.Text = "ĐVT              : ";
             // 
             // label6
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label6.Location = new Point(620, 152);
+            label6.Location = new Point(517, 165);
             label6.Name = "label6";
             label6.Size = new Size(199, 38);
             label6.TabIndex = 4;
@@ -194,7 +205,7 @@
             // 
             label5.AutoSize = true;
             label5.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label5.Location = new Point(620, 75);
+            label5.Location = new Point(517, 81);
             label5.Name = "label5";
             label5.Size = new Size(202, 38);
             label5.TabIndex = 3;
@@ -204,7 +215,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label4.Location = new Point(32, 229);
+            label4.Location = new Point(32, 240);
             label4.Name = "label4";
             label4.Size = new Size(197, 38);
             label4.TabIndex = 2;
@@ -214,7 +225,7 @@
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(32, 152);
+            label3.Location = new Point(32, 165);
             label3.Name = "label3";
             label3.Size = new Size(199, 38);
             label3.TabIndex = 1;
@@ -258,9 +269,11 @@
         private Button btnThem;
         private ComboBox cboLoaiHang;
         private TextBox txtGiaBan;
+        private TextBox txtDVT;
         private TextBox txtTenSP;
         private TextBox txtSoLuongTon;
         private TextBox txtMaSP;
+        private Label label7;
         private Label label6;
         private Label label5;
         private Label label4;

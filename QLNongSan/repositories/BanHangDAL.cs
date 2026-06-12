@@ -93,7 +93,14 @@ namespace QLNongSan.repositories
 
         internal DataTable GetDanhSachKhachHang()
         {
-            throw new NotImplementedException();
+            string query = "SELECT * FROM KhachHang";
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                DataTable dt = new DataTable();
+                new SqlDataAdapter(cmd).Fill(dt);
+                return dt;
+            }
         }
     }
 }

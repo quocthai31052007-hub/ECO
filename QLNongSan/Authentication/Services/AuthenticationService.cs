@@ -18,7 +18,7 @@ namespace QLNongSan.Authentication.Services
                 throw new AuthenticationError("Invalid password");
             }
             return LoggedInUser.FromEntity(user);
-            throw new NotImplementedException();
         }
     }
-}
+}        
+   
