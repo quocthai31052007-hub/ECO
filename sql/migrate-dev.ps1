@@ -1,0 +1,1 @@
+docker compose exec -it admin-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P Qlns@123! -C -i /run-sql/script.sql
