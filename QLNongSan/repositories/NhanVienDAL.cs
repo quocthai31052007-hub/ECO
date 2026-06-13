@@ -13,7 +13,8 @@ namespace QLNongSan.repositories
         public DataTable GetListNhanVien()
         {
             DataTable dt = new DataTable();
-            string query = "SELECT MaNV, HoTen, Username, VaiTro FROM NhanVien";
+            // BỔ SUNG: Thêm SDT, DiaChi vào câu lệnh SELECT
+            string query = "SELECT MaNV, HoTen, Username, VaiTro, SDT, DiaChi FROM NhanVien";
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))
             using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))

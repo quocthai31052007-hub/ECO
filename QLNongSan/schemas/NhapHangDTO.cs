@@ -46,5 +46,6 @@ namespace QLNongSan
         public string ChucVu { get; internal set; }
         public string HopDong { get; internal set; }
         public string TrangThai { get; internal set; }
+        public string DiaChi { get; internal set; }
     }
 }

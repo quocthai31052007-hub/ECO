@@ -1,223 +1,231 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Windows.Forms;
-using QLNongSan.repositories;
-using QLNongSan.schemas;
+using Microsoft.Data.SqlClient; // Hoặc System.Data.SqlClient tùy thuộc thư viện bạn đang dùng
 
 namespace QLNongSan.UI
 {
     public partial class FormNhapHang : Form
     {
-        private NhapHangDAL dal = new NhapHangDAL();
-        private DataTable dtChiTiet;          // bảng tạm lưu chi tiết phiếu nhập
-        private string maPNDangNhap;           // mã phiếu nhập hiện tại
+        // Chuỗi kết nối lấy đồng bộ theo kiến trúc dự án của bạn
+        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+
+        // Bảng tạm lưu chi tiết các mặt hàng chuẩn bị nhập kho
+        private DataTable dtChiTietTam;
 
         public FormNhapHang()
         {
             InitializeComponent();
+            KhoiTaoBangTam();
         }
 
         private void FormNhapHang_Load(object sender, EventArgs e)
         {
-            // Khởi tạo DataTable cho chi tiết
-            dtChiTiet = new DataTable();
-            dtChiTiet.Columns.Add("MaSP", typeof(string));
-            dtChiTiet.Columns.Add("TenSP", typeof(string));
-            dtChiTiet.Columns.Add("SoLuong", typeof(int));
-            dtChiTiet.Columns.Add("GiaNhap", typeof(decimal));
-            dtChiTiet.Columns.Add("HanSuDung", typeof(DateTime));
-            dtChiTiet.Columns.Add("ThanhTien", typeof(decimal));
-            dataGridView2.DataSource = dtChiTiet;
-
-            // Load combobox sản phẩm
-            var spList = dal.GetSanPhamList();
-            comboBox4.DataSource = spList;
-            comboBox4.DisplayMember = "TenSP";
-            comboBox4.ValueMember = "MaSP";
-
-            // Load combobox nhân viên
-            var nvList = dal.GetNhanVienList();
-            comboBox3.DataSource = nvList;
-            comboBox3.DisplayMember = "TenNV";
-            comboBox3.ValueMember = "MaNV";
-
-            // Tạo mã phiếu nhập mới
-            maPNDangNhap = dal.TaoMaPhieuNhap();
-            textBox1.Text = maPNDangNhap;
-            dateTimePicker1.Value = DateTime.Now;
+            LoadComboboxNhanVien();
+            LoadComboboxNhaCungCap();
+            LoadComboboxSanPham();
+            LamMoiForm();
         }
 
-        // Nút Thêm chi tiết sản phẩm
-        private void button7_Click(object sender, EventArgs e)
+        // Tạo cấu trúc bảng tạm để quản lý danh sách sản phẩm trên GridView
+        private void KhoiTaoBangTam()
         {
-            // Kiểm tra dữ liệu nhập
-            if (comboBox4.SelectedValue == null)
-            {
-                MessageBox.Show("Chọn sản phẩm!");
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(textBox3.Text) || !int.TryParse(textBox3.Text, out int soLuong) || soLuong <= 0)
-            {
-                MessageBox.Show("Số lượng phải là số nguyên dương!");
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(textBox4.Text) || !decimal.TryParse(textBox4.Text, out decimal giaNhap) || giaNhap <= 0)
-            {
-                MessageBox.Show("Giá nhập phải là số dương!");
-                return;
-            }
+            dtChiTietTam = new DataTable();
+            dtChiTietTam.Columns.Add("MaSP", typeof(string));
+            dtChiTietTam.Columns.Add("TenSP", typeof(string));
+            dtChiTietTam.Columns.Add("SoLuong", typeof(int));
+            dtChiTietTam.Columns.Add("GiaNhap", typeof(decimal));
 
-            string maSP = comboBox4.SelectedValue.ToString();
-            string tenSP = comboBox4.Text;
-            DateTime hanSD = dateTimePicker2.Value;
+            // Cột tự động tính toán: Thành tiền = Số lượng * Giá nhập
+            dtChiTietTam.Columns.Add("ThanhTien", typeof(decimal), "SoLuong * GiaNhap");
 
-            // Kiểm tra trùng sản phẩm trong phiếu tạm? Có thể cập nhật số lượng
-            DataRow[] existing = dtChiTiet.Select($"MaSP = '{maSP}'");
-            if (existing.Length > 0)
-            {
-                // Nếu đã có thì cộng dồn số lượng
-                int oldSL = Convert.ToInt32(existing[0]["SoLuong"]);
-                existing[0]["SoLuong"] = oldSL + soLuong;
-                existing[0]["ThanhTien"] = (oldSL + soLuong) * giaNhap;
-            }
-            else
-            {
-                DataRow row = dtChiTiet.NewRow();
-                row["MaSP"] = maSP;
-                row["TenSP"] = tenSP;
-                row["SoLuong"] = soLuong;
-                row["GiaNhap"] = giaNhap;
-                row["HanSuDung"] = hanSD;
-                row["ThanhTien"] = soLuong * giaNhap;
-                dtChiTiet.Rows.Add(row);
-            }
+            dgvChiTiet.DataSource = dtChiTietTam;
 
-            // Xóa các ô nhập sau khi thêm
-            textBox3.Clear();
-            textBox4.Clear();
-            comboBox4.SelectedIndex = -1;
-            dateTimePicker2.Value = DateTime.Now;
+            // Định dạng tiêu đề cột hiển thị lên màn hình
+            dgvChiTiet.Columns["MaSP"].HeaderText = "Mã Sản Phẩm";
+            dgvChiTiet.Columns["TenSP"].HeaderText = "Tên Sản Phẩm";
+            dgvChiTiet.Columns["SoLuong"].HeaderText = "Số Lượng";
+            dgvChiTiet.Columns["GiaNhap"].HeaderText = "Giá Nhập (VNĐ)";
+            dgvChiTiet.Columns["ThanhTien"].HeaderText = "Thành Tiền (VNĐ)";
+
+            // Định dạng hiển thị số tiền cho đẹp mắt
+            dgvChiTiet.Columns["GiaNhap"].DefaultCellStyle.Format = "#,##0";
+            dgvChiTiet.Columns["ThanhTien"].DefaultCellStyle.Format = "#,##0";
         }
 
-        // Nút Sửa dòng đang chọn
-        private void button9_Click(object sender, EventArgs e)
+        // Tự động tính tổng tiền từ bảng tạm và cập nhật lên giao diện
+        // Tìm đoạn code này:
+        private void TinhTongTienHiaDon()
         {
-            if (dataGridView2.CurrentRow == null) return;
-            DataRowView rowView = (DataRowView)dataGridView2.CurrentRow.DataBoundItem;
-            DataRow row = rowView.Row;
-
-            // Đưa thông tin lên các ô nhập để sửa
-            comboBox4.SelectedValue = row["MaSP"].ToString();
-            textBox3.Text = row["SoLuong"].ToString();
-            textBox4.Text = row["GiaNhap"].ToString();
-            dateTimePicker2.Value = Convert.ToDateTime(row["HanSuDung"]);
-
-            // Xóa dòng cũ (sau khi sửa sẽ thêm mới lại)
-            dtChiTiet.Rows.Remove(row);
-        }
-
-        // Nút Xóa dòng đang chọn
-        private void button8_Click(object sender, EventArgs e)
-        {
-            if (dataGridView2.CurrentRow == null) return;
-            DataRowView rowView = (DataRowView)dataGridView2.CurrentRow.DataBoundItem;
-            dtChiTiet.Rows.Remove(rowView.Row);
-        }
-
-        // Nút Làm mới các ô nhập
-        private void button10_Click(object sender, EventArgs e)
-        {
-            comboBox4.SelectedIndex = -1;
-            textBox3.Clear();
-            textBox4.Clear();
-            dateTimePicker2.Value = DateTime.Now;
-        }
-
-        // Nút Lưu phiếu nhập
-        private void button14_Click_1(object sender, EventArgs e)
-        {
-            if (dtChiTiet.Rows.Count == 0)
+            decimal tongTien = 0;
+            foreach (DataRow row in dtChiTietTam.Rows)
             {
-                MessageBox.Show("Chưa có sản phẩm nào trong phiếu nhập!");
-                return;
-            }
-
-            // Tạo đối tượng Phiếu nhập
-            PhieuNhapDTO pn = new PhieuNhapDTO
-            {
-                MaPN = maPNDangNhap,
-                NgayNhap = dateTimePicker1.Value,
-                MaNV = comboBox3.SelectedValue?.ToString(),
-                GhiChu = textBox2.Text
-            };
-
-            // Tạo danh sách chi tiết
-            List<ChiTietPhieuNhapDTO> chiTietList = new List<ChiTietPhieuNhapDTO>();
-            foreach (DataRow row in dtChiTiet.Rows)
-            {
-                chiTietList.Add(new ChiTietPhieuNhapDTO
+                if (row["ThanhTien"] != DBNull.Value)
                 {
-                    MaPN = maPNDangNhap,
-                    MaSP = row["MaSP"].ToString(),
-                    SoLuong = Convert.ToInt32(row["SoLuong"]),
-                    GiaNhap = Convert.ToDecimal(row["GiaNhap"]),
-                    HanSuDung = Convert.ToDateTime(row["HanSuDung"])
-                });
+                    // SỬA TẠI ĐÂY: Đổi 'toDecimal' thành 'ToDecimal' (Viết hoa chữ T)
+                    tongTien += Convert.ToDecimal(row["ThanhTien"]);
+                }
             }
-
-            // Gọi DAL lưu
-            bool kq = dal.LuuPhieuNhap(pn, chiTietList);
-            if (kq)
-            {
-                MessageBox.Show("Lưu phiếu nhập thành công!");
-                // Reset form
-                dtChiTiet.Clear();
-                maPNDangNhap = dal.TaoMaPhieuNhap();
-                textBox1.Text = maPNDangNhap;
-                textBox2.Clear();
-                comboBox3.SelectedIndex = -1;
-                dateTimePicker1.Value = DateTime.Now;
-            }
-            else
-            {
-                MessageBox.Show("Lỗi khi lưu phiếu nhập, vui lòng thử lại!");
-            }
+            lblTongTien.Text = tongTien.ToString("#,##0") + " VNĐ";
         }
 
-        // Nút Hủy phiếu: xóa dữ liệu tạm và tạo mã mới
-        private void button15_Click(object sender, EventArgs e)
+        // --- TẢI DỮ LIỆU LÊN CÁC COMBOBOX ---
+        private void LoadComboboxNhanVien()
         {
-            dtChiTiet.Clear();
-            maPNDangNhap = dal.TaoMaPhieuNhap();
-            textBox1.Text = maPNDangNhap;
-            textBox2.Clear();
-            comboBox3.SelectedIndex = -1;
-            comboBox4.SelectedIndex = -1;
-            textBox3.Clear();
-            textBox4.Clear();
-            dateTimePicker1.Value = DateTime.Now;
-            dateTimePicker2.Value = DateTime.Now;
+            string query = "SELECT MaNV, HoTen FROM NhanVien"; // Đổi lại tên bảng/khóa nếu cần
+            FillCombo(query, cboNhanVien, "HoTen", "MaNV");
         }
 
-        // Các sự kiện rỗng khác giữ nguyên (hoặc có thể bỏ)
-        private void groupBox1_Enter(object sender, EventArgs e) { }
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
-        private void textBox1_TextChanged(object sender, EventArgs e) { }
-        private void label6_Click(object sender, EventArgs e) { }
-        private void label7_Click(object sender, EventArgs e) { }
-        private void dateTimePicker1_ValueChanged(object sender, EventArgs e) { }
-        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e) { }
-        private void label9_Click(object sender, EventArgs e) { }
-        private void label10_Click(object sender, EventArgs e) { }
-        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e) { }
-        private void label12_Click(object sender, EventArgs e) { }
-        private void textBox3_TextChanged(object sender, EventArgs e) { }
-        private void groupBox2_Enter(object sender, EventArgs e) { }
-        private void button14_Click(object sender, EventArgs e) { }
-        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
-        private void label13_Click(object sender, EventArgs e) { }
-        private void dateTimePicker2_ValueChanged(object sender, EventArgs e) { }
+        private void LoadComboboxNhaCungCap()
+        {
+            string query = "SELECT MaNCC, TenNCC FROM NhaCungCap";
+            FillCombo(query, cboNhaCungCap, "TenNCC", "MaNCC");
+        }
+
+        private void LoadComboboxSanPham()
+        {
+            string query = "SELECT MaSP, TenSP FROM SanPham";
+            FillCombo(query, cboSanPham, "TenSP", "MaSP");
+        }
+
+        private void FillCombo(string query, ComboBox combo, string displayMember, string valueMember)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                {
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    combo.DataSource = dt;
+                    combo.DisplayMember = displayMember;
+                    combo.ValueMember = valueMember;
+                    combo.SelectedIndex = -1; // Để trống mặc định ban đầu
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải danh sách: " + ex.Message, "Lỗi Kết Nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+
+        // --- XỬ LÝ SỰ KIỆN KHỐI NÚT CHỨC NĂNG ---
+
+        // 1. Thêm sản phẩm vào lưới tạm
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            if (cboSanPham.SelectedIndex == -1) { MessageBox.Show("Vui lòng chọn sản phẩm!"); return; }
+            if (!int.TryParse(txtSoLuong.Text.Trim(), out int soLuong) || soLuong <= 0) { MessageBox.Show("Số lượng phải là số nguyên dương!"); return; }
+            if (!decimal.TryParse(txtGiaNhap.Text.Trim(), out decimal giaNhap) || giaNhap < 0) { MessageBox.Show("Giá nhập không hợp lệ!"); return; }
+
+            string maSP = cboSanPham.SelectedValue.ToString();
+            string tenSP = cboSanPham.Text;
+
+            // Kiểm tra xem sản phẩm đã có trong danh sách chuẩn bị nhập chưa, nếu có thì cộng dồn số lượng
+            foreach (DataRow row in dtChiTietTam.Rows)
+            {
+                if (row["MaSP"].ToString() == maSP)
+                {
+                    row["SoLuong"] = Convert.ToInt32(row["SoLuong"]) + soLuong;
+                    row["GiaNhap"] = giaNhap; // Cập nhật lại giá nhập mới nhất
+                    TinhTongTienHiaDon();
+                    return;
+                }
+            }
+
+            // Nếu là sản phẩm mới hoàn toàn thì thêm dòng mới vào bảng tạm
+            dtChiTietTam.Rows.Add(maSP, tenSP, soLuong, giaNhap);
+            TinhTongTienHiaDon();
+        }
+
+        // 2. Xóa sản phẩm được chọn ra khỏi lưới tạm
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            if (dgvChiTiet.CurrentRow == null) { MessageBox.Show("Chọn một sản phẩm trên lưới dữ liệu để xóa!"); return; }
+
+            if (MessageBox.Show("Xóa sản phẩm này khỏi danh sách nhập?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                dgvChiTiet.Rows.Remove(dgvChiTiet.CurrentRow);
+                TinhTongTienHiaDon();
+            }
+        }
+
+        // 3. Thực hiện lưu toàn bộ hóa đơn nhập (Master-Detail) vào Database
+        private void btnLuu_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtMaPN.Text)) { MessageBox.Show("Vui lòng nhập Mã phiếu nhập!"); return; }
+            if (cboNhanVien.SelectedIndex == -1) { MessageBox.Show("Vui lòng chọn Nhân viên lập phiếu!"); return; }
+            if (cboNhaCungCap.SelectedIndex == -1) { MessageBox.Show("Vui lòng chọn Nhà cung cấp!"); return; }
+            if (dtChiTietTam.Rows.Count == 0) { MessageBox.Show("Danh sách sản phẩm nhập đang trống. Vui lòng thêm sản phẩm trước!"); return; }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                // Sử dụng Transaction để đảm bảo an toàn: Thất bại một bước là hủy toàn bộ dữ liệu tránh lỗi rác
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // Bước 3.1: Lưu thông tin bảng chính (PhieuNhap)
+                        // Bỏ MaPN ra khỏi INSERT, để SQL tự sinh
+                        string sqlMaster = "INSERT INTO PhieuNhap (MaNV, MaNCC, NgayNhap) VALUES (@MaNV, @MaNCC, @NgayNhap)";
+                        using (SqlCommand cmdMaster = new SqlCommand(sqlMaster, conn, trans))
+                        {
+                            cmdMaster.Parameters.AddWithValue("@MaNV", cboNhanVien.SelectedValue);
+                            cmdMaster.Parameters.AddWithValue("@MaNCC", cboNhaCungCap.SelectedValue);
+                            cmdMaster.Parameters.AddWithValue("@NgayNhap", dtpNgayNhap.Value);
+                            cmdMaster.ExecuteNonQuery();
+                        }
+
+                        // Bước 3.2: Duyệt vòng lặp lưu chi tiết từng món hàng (ChiTietPhieuNhap)
+                        string sqlDetail = "INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, GiaNhap) VALUES (@MaPN, @MaSP, @SoLuong, @GiaNhap)";
+                        foreach (DataRow row in dtChiTietTam.Rows)
+                        {
+                            using (SqlCommand cmdDetail = new SqlCommand(sqlDetail, conn, trans))
+                            {
+                                cmdDetail.Parameters.AddWithValue("@MaPN", txtMaPN.Text.Trim());
+                                cmdDetail.Parameters.AddWithValue("@MaSP", row["MaSP"]);
+                                cmdDetail.Parameters.AddWithValue("@SoLuong", row["SoLuong"]);
+                                cmdDetail.Parameters.AddWithValue("@GiaNhap", row["GiaNhap"]);
+                                cmdDetail.ExecuteNonQuery();
+                            }
+                        }
+
+                        // Hoàn tất lưu dữ liệu thành công
+                        trans.Commit();
+                        MessageBox.Show("Lưu phiếu nhập hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LamMoiForm();
+                    }
+                    catch (Exception ex)
+                    {
+                        trans.Rollback(); // Hủy bỏ thao tác nếu xuất hiện lỗi bất kỳ
+                        MessageBox.Show("Lỗi hệ thống khi lưu phiếu nhập: " + ex.Message, "Lỗi nghiêm trọng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        // 4. Làm mới sạch sẽ form để chuẩn bị lên phiếu nhập tiếp theo
+        private void btnLamMoi_Click(object sender, EventArgs e)
+        {
+            LamMoiForm();
+        }
+
+        private void LamMoiForm()
+        {
+            // Tự động tạo mã phiếu nhập ngẫu nhiên theo thời gian thực (Tránh trùng lặp mã)
+            txtMaPN.Text = "PN" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            cboNhanVien.SelectedIndex = -1;
+            cboNhaCungCap.SelectedIndex = -1;
+            cboSanPham.SelectedIndex = -1;
+            txtSoLuong.Clear();
+            txtGiaNhap.Clear();
+            dtpNgayNhap.Value = DateTime.Now;
+
+            dtChiTietTam.Rows.Clear();
+            TinhTongTienHiaDon();
+        }
     }
 }

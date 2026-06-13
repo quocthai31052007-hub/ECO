@@ -107,5 +107,10 @@ namespace QLNongSan.UI
         {
 
         }
+
+        private void grpThongTin_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 }

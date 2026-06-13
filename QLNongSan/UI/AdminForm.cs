@@ -45,7 +45,7 @@ namespace QLNongSan
             childForm.Show();
 
             // 4. Đổi màu nút
-            HighlightButton(btnSender);
+
         }
 
         // 3. Hàm đổi màu nút khi được bấm
@@ -128,6 +128,11 @@ namespace QLNongSan
         private void button5_Click(object sender, EventArgs e)
         {
             OpenChildForm(new FormNhanVien(), sender);
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new FormKhachHang(), sender);
         }
     }
 }

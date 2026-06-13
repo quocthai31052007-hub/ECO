@@ -36,6 +36,8 @@
             button6 = new Button();
             pnlContent = new Panel();
             panel1 = new Panel();
+            btnKhachHang = new Button();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // button1
@@ -122,12 +124,25 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(btnKhachHang);
             panel1.Dock = DockStyle.Left;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(311, 1055);
             panel1.TabIndex = 13;
             panel1.Paint += panel1_Paint;
+            // 
+            // btnKhachHang
+            // 
+            btnKhachHang.Location = new Point(13, 492);
+            btnKhachHang.Margin = new Padding(4);
+            btnKhachHang.Name = "btnKhachHang";
+            btnKhachHang.Size = new Size(270, 60);
+            btnKhachHang.TabIndex = 11;
+            btnKhachHang.Text = "👤       Khách hàng";
+            btnKhachHang.TextAlign = ContentAlignment.MiddleLeft;
+            btnKhachHang.UseVisualStyleBackColor = true;
+            btnKhachHang.Click += button7_Click;
             // 
             // AdminForm
             // 
@@ -145,6 +160,7 @@
             Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             Margin = new Padding(4);
             Name = "AdminForm";
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -158,5 +174,6 @@
         private Button button6;
         private Panel pnlContent;
         private Panel panel1;
+        private Button btnKhachHang;
     }
 }

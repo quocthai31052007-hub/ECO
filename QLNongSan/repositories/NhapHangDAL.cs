@@ -106,5 +106,10 @@ namespace QLNongSan.repositories
                 catch { transaction.Rollback(); return false; }
             }
         }
+
+        internal static string SavePhieuNhap(string maPN, string? maNV, string? maNCC, DateTime ngayNhap, DataTable dtChiTietTam)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
