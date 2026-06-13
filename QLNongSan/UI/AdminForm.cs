@@ -74,7 +74,7 @@ namespace QLNongSan
         private void button1_Click(object sender, EventArgs e)
         {
             // Giờ đây 'FormSanPham' đã tồn tại, dòng này sẽ không còn bị gạch đỏ
-            OpenChildForm(new FormSanPham(), sender);
+            OpenChildForm(new FormSanPham(application), sender);
         }
 
         // Biến dùng để lưu trữ Form con đang hiển thị hiện tại
@@ -112,27 +112,27 @@ namespace QLNongSan
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            OpenChildForm(new FormLoaiHang(), sender);
+            OpenChildForm(new FormLoaiHang(application), sender);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new FormNhapHang(), sender);
+            OpenChildForm(new FormNhapHang(application), sender);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new FormBanHang(), sender);
+            OpenChildForm(new FormBanHang(application), sender);
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new FormNhanVien(), sender);
+            OpenChildForm(new FormNhanVien(application), sender);
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new FormKhachHang(), sender);
+            OpenChildForm(new FormKhachHang(application), sender);
         }
     }
 }

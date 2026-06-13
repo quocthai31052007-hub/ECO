@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using QLNongSan.repositories;
+using QLNongSan.Repositories;
 using QLNongSan.schemas;
 
 namespace QLNongSan.UI
 {
     public partial class FormKhachHang : Form
     {
-        private KhachHangDAL khachHangDAL = new KhachHangDAL();
+        private readonly Application application;
 
-        public FormKhachHang()
+        public FormKhachHang(Application application)
         {
+            this.application = application;
             InitializeComponent();
         }
 
@@ -24,7 +25,7 @@ namespace QLNongSan.UI
         {
             try
             {
-                dgvKhachHang.DataSource = khachHangDAL.GetListKhachHang();
+                dgvKhachHang.DataSource = application.customerRepository.GetListKhachHang();
             }
             catch (Exception ex)
             {
@@ -58,7 +59,7 @@ namespace QLNongSan.UI
 
         private void btnThem_Click(object sender, EventArgs e)
         {
-            string kq = khachHangDAL.AddKhachHang(LayDuLieuForm());
+            string kq = application.customerRepository.AddKhachHang(LayDuLieuForm());
             if (kq == "SUCCESS")
             {
                 MessageBox.Show("Thêm khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -69,7 +70,7 @@ namespace QLNongSan.UI
 
         private void btnSua_Click(object sender, EventArgs e)
         {
-            string kq = khachHangDAL.UpdateKhachHang(LayDuLieuForm());
+            string kq = application.customerRepository.UpdateKhachHang(LayDuLieuForm());
             if (kq == "SUCCESS")
             {
                 MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -83,7 +84,7 @@ namespace QLNongSan.UI
             if (string.IsNullOrWhiteSpace(txtMaKH.Text)) { MessageBox.Show("Chọn khách hàng cần xóa!"); return; }
             if (MessageBox.Show("Xóa khách hàng này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                string kq = khachHangDAL.DeleteKhachHang(txtMaKH.Text.Trim());
+                string kq = application.customerRepository.DeleteKhachHang(txtMaKH.Text.Trim());
                 if (kq == "SUCCESS") { MessageBox.Show("Xóa thành công!"); HienThiData(); LamMoiForm(); }
                 else MessageBox.Show(kq, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

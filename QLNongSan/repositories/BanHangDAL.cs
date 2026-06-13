@@ -3,17 +3,19 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
+
     public class BanHangDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+        public required SQLServerFactory factory;
 
         public DataTable GetDanhSachSanPham()
         {
             DataTable dt = new DataTable();
             string query = "SELECT MaSP, TenSP, DVT, GiaBan FROM SanPham";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 adapter.Fill(dt);
@@ -25,7 +27,7 @@ namespace QLNongSan.repositories
         {
             DataTable dt = new DataTable();
             string query = "SELECT MaNV, HoTen FROM NhanVien";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 adapter.Fill(dt);
@@ -38,7 +40,7 @@ namespace QLNongSan.repositories
             if (string.IsNullOrWhiteSpace(phieu.MaPB)) return "Vui lòng nhập Mã hóa đơn!";
             if (chiTiet == null || chiTiet.Rows.Count == 0) return "Chưa có sản phẩm!";
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             {
                 conn.Open();
                 SqlTransaction transaction = conn.BeginTransaction();
@@ -81,7 +83,7 @@ namespace QLNongSan.repositories
         public DataRow GetSanPhamByTen(string tenSP)
         {
             string query = "SELECT MaSP, TenSP, DVT, GiaBan FROM SanPham WHERE TenSP=@TenSP";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 cmd.Parameters.AddWithValue("@TenSP", tenSP);
@@ -94,7 +96,7 @@ namespace QLNongSan.repositories
         internal DataTable GetDanhSachKhachHang()
         {
             string query = "SELECT * FROM KhachHang";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 DataTable dt = new DataTable();

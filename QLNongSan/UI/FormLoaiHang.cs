@@ -1,4 +1,4 @@
-using QLNongSan.repositories;
+using QLNongSan.Repositories;
 using QLNongSan.schemas;
 using System;
 using System.Windows.Forms;
@@ -7,10 +7,11 @@ namespace QLNongSan.UI
 {
     public partial class FormLoaiHang : Form
     {
-        private LoaiHangDAL loaiHangDAL = new LoaiHangDAL();
+        private readonly Application application;
 
-        public FormLoaiHang()
+        public FormLoaiHang(Application application)
         {
+            this.application = application;
             InitializeComponent();
         }
 
@@ -23,7 +24,7 @@ namespace QLNongSan.UI
         {
             try
             {
-                dgvLoaiHang.DataSource = loaiHangDAL.GetListLoaiHang();
+                dgvLoaiHang.DataSource = application.categoryRepository.GetListLoaiHang();
             }
             catch (Exception ex)
             {
@@ -39,7 +40,7 @@ namespace QLNongSan.UI
                 lh.MaLoai = txtMaLoai.Text.Trim();
                 lh.TenLoai = txtTenLoai.Text.Trim();
 
-                string ketQua = loaiHangDAL.AddLoaiHang(lh);
+                string ketQua = application.categoryRepository.AddLoaiHang(lh);
 
                 if (ketQua == "SUCCESS")
                 {
@@ -66,7 +67,7 @@ namespace QLNongSan.UI
                 lh.MaLoai = txtMaLoai.Text.Trim();
                 lh.TenLoai = txtTenLoai.Text.Trim();
 
-                string ketQua = loaiHangDAL.UpdateLoaiHang(lh);
+                string ketQua = application.categoryRepository.UpdateLoaiHang(lh);
 
                 if (ketQua == "SUCCESS")
                 {
@@ -92,7 +93,7 @@ namespace QLNongSan.UI
                 if (MessageBox.Show("Bạn có chắc muốn xóa?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     string maLoai = txtMaLoai.Text.Trim();
-                    string ketQua = loaiHangDAL.DeleteLoaiHang(maLoai);
+                    string ketQua = application.categoryRepository.DeleteLoaiHang(maLoai);
 
                     if (ketQua == "SUCCESS")
                     {

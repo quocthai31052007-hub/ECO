@@ -1,19 +1,20 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
+
     public class KhachHangDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+        public required SQLServerFactory factory;
 
         public DataTable GetListKhachHang()
         {
             DataTable dt = new DataTable();
             string query = "SELECT MaKH, HoTen, SDT, DiaChi, Email, GhiChu FROM KhachHang";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 adapter.Fill(dt);
             return dt;
@@ -25,7 +26,7 @@ namespace QLNongSan.repositories
                 return "Vui lòng nhập Mã và Họ tên khách hàng!";
             string query = @"INSERT INTO KhachHang (MaKH, HoTen, SDT, DiaChi, Email, GhiChu)
                              VALUES (@MaKH, @HoTen, @SDT, @DiaChi, @Email, @GhiChu)";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -48,7 +49,7 @@ namespace QLNongSan.repositories
             if (string.IsNullOrWhiteSpace(kh.MaKH)) return "Vui lòng chọn khách hàng!";
             string query = @"UPDATE KhachHang SET HoTen=@HoTen, SDT=@SDT,
                              DiaChi=@DiaChi, Email=@Email, GhiChu=@GhiChu WHERE MaKH=@MaKH";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -70,7 +71,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(maKH)) return "Vui lòng chọn khách hàng!";
             string query = "DELETE FROM KhachHang WHERE MaKH=@MaKH";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try

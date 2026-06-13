@@ -4,17 +4,18 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
     public class NhapHangDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+        public required SQLServerFactory factory;
 
         public List<SanPhamDTO> GetSanPhamList()
         {
             List<SanPhamDTO> list = new List<SanPhamDTO>();
             string query = "SELECT MaSP, TenSP FROM SanPham";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             {
                 SqlCommand cmd = new SqlCommand(query, conn);
                 conn.Open();
@@ -30,7 +31,7 @@ namespace QLNongSan.repositories
         {
             List<NhanVienDTO> list = new List<NhanVienDTO>();
             string query = "SELECT MaNV, HoTen FROM NhanVien";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             {
                 SqlCommand cmd = new SqlCommand(query, conn);
                 conn.Open();
@@ -46,7 +47,7 @@ namespace QLNongSan.repositories
             string newCode = "PN001";
             string query = "SELECT TOP 1 MaPN FROM PhieuNhap ORDER BY MaPN DESC";
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             {
                 SqlCommand cmd = new SqlCommand(query, conn);
                 conn.Open();
@@ -73,7 +74,7 @@ namespace QLNongSan.repositories
         // Dùng DonGiaNhap thay vì GiaNhap
         public bool LuuPhieuNhap(PhieuNhapDTO phieuNhap, List<ChiTietPhieuNhapDTO> chiTietList)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             {
                 conn.Open();
                 SqlTransaction transaction = conn.BeginTransaction();

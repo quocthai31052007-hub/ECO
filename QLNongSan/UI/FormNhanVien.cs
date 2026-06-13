@@ -2,17 +2,18 @@
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using QLNongSan.repositories;
+using QLNongSan.Repositories;
 using QLNongSan.schemas;
 
 namespace QLNongSan.UI
 {
     public partial class FormNhanVien : Form
     {
-        private NhanVienDAL nhanVienDAL = new NhanVienDAL();
+        private readonly Application application;
 
-        public FormNhanVien()
+        public FormNhanVien(Application application)
         {
+            this.application = application;
             InitializeComponent();
             DinhDangBieuMauLuo();
         }
@@ -56,7 +57,7 @@ namespace QLNongSan.UI
                 dgvNhanVien.Columns.Clear();
 
                 // BƯỚC 2: Gọi tầng DAL để lấy DataTable chứa đủ 6 trường (gồm cả SDT và DiaChi)
-                DataTable dt = nhanVienDAL.GetListNhanVien();
+                DataTable dt = application.employeeRepository.GetListNhanVien();
 
                 if (dt != null)
                 {
@@ -153,7 +154,7 @@ namespace QLNongSan.UI
             }
 
             NhanVienDTO nv = LayDuLieuForm();
-            string ketQua = nhanVienDAL.AddNhanVien(nv);
+            string ketQua = application.employeeRepository.AddNhanVien(nv);
 
             if (ketQua == "SUCCESS")
             {
@@ -176,7 +177,7 @@ namespace QLNongSan.UI
             }
 
             NhanVienDTO nv = LayDuLieuForm();
-            string ketQua = nhanVienDAL.UpdateNhanVien(nv);
+            string ketQua = application.employeeRepository.UpdateNhanVien(nv);
 
             if (ketQua == "SUCCESS")
             {
@@ -201,7 +202,7 @@ namespace QLNongSan.UI
             if (MessageBox.Show($"Xác nhận xóa nhân viên [{txtHoTen.Text}] khỏi hệ thống?", "Xác nhận",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                string ketQua = nhanVienDAL.DeleteNhanVien(txtMaNV.Text.Trim());
+                string ketQua = application.employeeRepository.DeleteNhanVien(txtMaNV.Text.Trim());
 
                 if (ketQua == "SUCCESS")
                 {

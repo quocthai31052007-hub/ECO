@@ -3,12 +3,12 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
     public class ThongTinLoDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
-
+        public required SQLServerFactory factory;
         // Lấy danh sách lô + thông tin khách hàng
         public DataTable GetListLo()
         {
@@ -18,7 +18,7 @@ namespace QLNongSan.repositories
                              l.NgayMua, l.ThongTinLienHe, l.TrangThai, l.GhiChu
                              FROM ThongTinLo l
                              LEFT JOIN KhachHang k ON l.MaKH = k.MaKH";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 adapter.Fill(dt);
             return dt;
@@ -32,7 +32,7 @@ namespace QLNongSan.repositories
                              MaKH, NgayMua, ThongTinLienHe, TrangThai, GhiChu)
                              VALUES (@MaLo, @TenLo, @SoLuongNhap, @NgayNhap, @DonViNhap,
                              @MaKH, @NgayMua, @ThongTinLienHe, @TrangThai, @GhiChu)";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -61,7 +61,7 @@ namespace QLNongSan.repositories
                              NgayNhap=@NgayNhap, DonViNhap=@DonViNhap, MaKH=@MaKH,
                              NgayMua=@NgayMua, ThongTinLienHe=@ThongTinLienHe,
                              TrangThai=@TrangThai, GhiChu=@GhiChu WHERE MaLo=@MaLo";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -87,7 +87,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(maLo)) return "Vui lòng chọn lô!";
             string query = "DELETE FROM ThongTinLo WHERE MaLo=@MaLo";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -105,7 +105,7 @@ namespace QLNongSan.repositories
         {
             DataTable dt = new DataTable();
             string query = "SELECT MaKH, HoTen FROM KhachHang";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 adapter.Fill(dt);
             return dt;

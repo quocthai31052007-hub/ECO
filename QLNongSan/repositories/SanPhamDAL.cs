@@ -3,11 +3,13 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
+
     public class SanPhamDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+        public required SQLServerFactory factory;
 
         // Lấy toàn bộ sản phẩm (Form gọi method này)
         public DataTable GetListSanPham()
@@ -16,7 +18,7 @@ namespace QLNongSan.repositories
             string query = @"SELECT MaSP as [Mã SP], TenSP as [Tên sản phẩm], DVT as [ĐVT],
                              GiaBan as [Giá bán], SoLuongTon as [Tồn kho], MaLoai as [Loại hàng]
                              FROM SanPham";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 adapter.Fill(dt);
             return dt;
@@ -30,7 +32,7 @@ namespace QLNongSan.repositories
 
             string query = @"INSERT INTO SanPham (TenSP, DVT, GiaBan, SoLuongTon, MaLoai)
                      VALUES (@TenSP, @DVT, @GiaBan, @SoLuongTon, @MaLoai)";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -53,7 +55,7 @@ namespace QLNongSan.repositories
             if (string.IsNullOrWhiteSpace(sp.MaSP)) return "Vui lòng chọn sản phẩm!";
             string query = @"UPDATE SanPham SET TenSP=@TenSP, DVT=@DVT, GiaBan=@GiaBan,
                              SoLuongTon=@SoLuongTon, MaLoai=@MaLoai WHERE MaSP=@MaSP";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -76,7 +78,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(maSP)) return "Vui lòng chọn sản phẩm!";
             string query = "DELETE FROM SanPham WHERE MaSP=@MaSP";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -94,7 +96,7 @@ namespace QLNongSan.repositories
         {
             DataTable dt = new DataTable();
             string query = "SELECT MaLoai, TenLoai FROM LoaiHang";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 adapter.Fill(dt);
             return dt;

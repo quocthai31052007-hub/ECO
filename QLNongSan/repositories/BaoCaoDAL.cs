@@ -2,7 +2,7 @@ using QLNongSan.schemas;
 using System.Collections.Generic;
 using System.Data;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
     public class BaoCaoDAL
     {

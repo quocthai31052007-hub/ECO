@@ -7,14 +7,14 @@ namespace QLNongSan.UI
 {
     public partial class FormNhapHang : Form
     {
-        // Chuỗi kết nối lấy đồng bộ theo kiến trúc dự án của bạn
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+        private readonly Application application;
 
         // Bảng tạm lưu chi tiết các mặt hàng chuẩn bị nhập kho
         private DataTable dtChiTietTam;
 
-        public FormNhapHang()
+        public FormNhapHang(Application application)
         {
+            this.application = application;
             InitializeComponent();
             KhoiTaoBangTam();
         }
@@ -92,7 +92,7 @@ namespace QLNongSan.UI
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = application.database.GetConnection())
                 using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
                 {
                     DataTable dt = new DataTable();
@@ -108,7 +108,7 @@ namespace QLNongSan.UI
                 MessageBox.Show("Lỗi tải danh sách: " + ex.Message, "Lỗi Kết Nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
+
 
         // --- XỬ LÝ SỰ KIỆN KHỐI NÚT CHỨC NĂNG ---
 
@@ -159,7 +159,7 @@ namespace QLNongSan.UI
             if (cboNhaCungCap.SelectedIndex == -1) { MessageBox.Show("Vui lòng chọn Nhà cung cấp!"); return; }
             if (dtChiTietTam.Rows.Count == 0) { MessageBox.Show("Danh sách sản phẩm nhập đang trống. Vui lòng thêm sản phẩm trước!"); return; }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = application.database.GetConnection())
             {
                 conn.Open();
                 // Sử dụng Transaction để đảm bảo an toàn: Thất bại một bước là hủy toàn bộ dữ liệu tránh lỗi rác

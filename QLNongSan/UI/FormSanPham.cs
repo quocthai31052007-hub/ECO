@@ -1,4 +1,4 @@
-﻿using QLNongSan.repositories;
+﻿using QLNongSan.Repositories;
 using QLNongSan.schemas;
 using System;
 using System.Data;
@@ -8,10 +8,12 @@ namespace QLNongSan.UI
 {
     public partial class FormSanPham : Form
     {
-        private SanPhamDAL sanPhamDAL = new SanPhamDAL();
-
-        public FormSanPham()
+        private readonly Application application;
+        public FormSanPham(
+            Application application
+        )
         {
+            this.application = application;
             InitializeComponent();
             this.Load += FormSanPham_Load;
             this.btnThem.Click += btnThem_Click;
@@ -34,7 +36,7 @@ namespace QLNongSan.UI
         {
             try
             {
-                var dt = sanPhamDAL.GetDanhSachLoaiHang();
+                var dt = application.productRepository.GetDanhSachLoaiHang();
                 cboLoaiHang.DataSource = dt;
                 cboLoaiHang.DisplayMember = "TenLoai";
                 cboLoaiHang.ValueMember = "MaLoai";
@@ -50,7 +52,7 @@ namespace QLNongSan.UI
         {
             try
             {
-                dgvSanPham.DataSource = sanPhamDAL.GetListSanPham();
+                dgvSanPham.DataSource = application.productRepository.GetListSanPham();
             }
             catch (Exception ex)
             {
@@ -101,7 +103,7 @@ namespace QLNongSan.UI
                     GiaBan = decimal.Parse(txtGiaBan.Text.Trim())
                 };
 
-                string ketQua = sanPhamDAL.AddSanPham(sp);
+                string ketQua = application.productRepository.AddSanPham(sp);
                 if (ketQua == "SUCCESS")
                 {
                     MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -144,7 +146,7 @@ namespace QLNongSan.UI
                     GiaBan = decimal.Parse(txtGiaBan.Text.Trim())
                 };
 
-                string ketQua = sanPhamDAL.UpdateSanPham(sp);
+                string ketQua = application.productRepository.UpdateSanPham(sp);
                 if (ketQua == "SUCCESS")
                 {
                     MessageBox.Show("Cập nhật sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -177,7 +179,7 @@ namespace QLNongSan.UI
                 DialogResult dr = MessageBox.Show("Bạn có chắc chắn muốn xóa sản phẩm này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dr == DialogResult.Yes)
                 {
-                    string ketQua = sanPhamDAL.DeleteSanPham(maSP);
+                    string ketQua = application.productRepository.DeleteSanPham(maSP);
                     if (ketQua == "SUCCESS")
                     {
                         MessageBox.Show("Xóa sản phẩm thành công!", "Thông báo");

@@ -3,17 +3,18 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
+
     public class LoaiHangDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
-
+        public required SQLServerFactory factory;
         public DataTable GetListLoaiHang()
         {
             DataTable dt = new DataTable();
             string query = "SELECT MaLoai, TenLoai FROM LoaiHang";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 adapter.Fill(dt);
@@ -25,7 +26,7 @@ namespace QLNongSan.repositories
             if (string.IsNullOrWhiteSpace(lh.TenLoai))
                 return "Vui lòng nhập đầy đủ thông tin!";
             string query = "INSERT INTO LoaiHang (TenLoai) VALUES (@TenLoai)";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -42,7 +43,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(lh.MaLoai)) return "Vui lòng chọn loại hàng!";
             string query = "UPDATE LoaiHang SET TenLoai=@TenLoai WHERE MaLoai=@MaLoai";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -60,7 +61,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(maLoai)) return "Vui lòng chọn loại hàng!";
             string query = "DELETE FROM LoaiHang WHERE MaLoai=@MaLoai";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try

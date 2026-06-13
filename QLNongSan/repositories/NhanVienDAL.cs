@@ -3,11 +3,12 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using QLNongSan.schemas;
 
-namespace QLNongSan.repositories
+namespace QLNongSan.Repositories
 {
+    using Databases;
     public class NhanVienDAL
     {
-        private string connectionString = @"Data Source=(local);Initial Catalog=QuanLyNongSan;Integrated Security=True;TrustServerCertificate=True";
+        public required SQLServerFactory factory;
 
         // Cột thực tế: MaNV, HoTen, Username, Password, VaiTro
         public DataTable GetListNhanVien()
@@ -15,7 +16,7 @@ namespace QLNongSan.repositories
             DataTable dt = new DataTable();
             // BỔ SUNG: Thêm SDT, DiaChi vào câu lệnh SELECT
             string query = "SELECT MaNV, HoTen, Username, VaiTro, SDT, DiaChi FROM NhanVien";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 adapter.Fill(dt);
@@ -27,7 +28,7 @@ namespace QLNongSan.repositories
             if (string.IsNullOrWhiteSpace(nv.MaNV) || string.IsNullOrWhiteSpace(nv.TenNV))
                 return "Vui lòng nhập Mã và Tên nhân viên!";
             string query = "INSERT INTO NhanVien (MaNV, HoTen, Username, Password, VaiTro) VALUES (@MaNV, @HoTen, @Username, @Password, @VaiTro)";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -48,7 +49,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(nv.MaNV)) return "Vui lòng chọn nhân viên!";
             string query = "UPDATE NhanVien SET HoTen=@HoTen, VaiTro=@VaiTro WHERE MaNV=@MaNV";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
@@ -67,7 +68,7 @@ namespace QLNongSan.repositories
         {
             if (string.IsNullOrWhiteSpace(maNV)) return "Vui lòng chọn nhân viên!";
             string query = "DELETE FROM NhanVien WHERE MaNV=@MaNV";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try

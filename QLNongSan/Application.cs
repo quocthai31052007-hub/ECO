@@ -4,6 +4,14 @@ namespace QLNongSan
     public class Application
     {
         public required Authentication.Services.IAuthenticationService authenticationService;
-        // public required Products.Services.IProductService productService;
+        public required Repositories.BanHangDAL salesRepository;
+        public required Repositories.LoaiHangDAL categoryRepository;
+        public required Repositories.KhachHangDAL customerRepository;
+        public required Repositories.NhapHangDAL purchaseRepository;
+        public required Repositories.SanPhamDAL productRepository;
+        public required Repositories.ThongTinLoDAL batchRepository;
+        public required Repositories.BaoCaoDAL reportRepository;
+        public required Repositories.NhanVienDAL employeeRepository;
+        public required Databases.SQLServerFactory database;
     }
 }

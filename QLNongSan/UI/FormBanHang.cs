@@ -1,4 +1,4 @@
-﻿using QLNongSan.repositories;
+﻿using QLNongSan.Repositories;
 using QLNongSan.schemas;
 using System;
 using System.Data;
@@ -9,13 +9,14 @@ namespace QLNongSan.UI
 {
     public partial class FormBanHang : Form
     {
-        private BanHangDAL banHangDAL = new BanHangDAL();
+        private readonly Application application;
 
         // DataTable tạm lưu chi tiết phiếu bán hiện tại
         private DataTable dtChiTiet = new DataTable();
 
-        public FormBanHang()
+        public FormBanHang(Application application)
         {
+            this.application = application;
             InitializeComponent();
         }
 
@@ -45,13 +46,13 @@ namespace QLNongSan.UI
             try
             {
                 // Khách hàng
-                DataTable dtKH = banHangDAL.GetDanhSachKhachHang();
+                DataTable dtKH = application.salesRepository.GetDanhSachKhachHang();
                 comboBox1.DataSource = dtKH;
                 comboBox1.DisplayMember = "TenKH";
                 comboBox1.ValueMember = "MaKH";
 
                 // Nhân viên bán
-                DataTable dtNV = banHangDAL.GetDanhSachNhanVien();
+                DataTable dtNV = application.salesRepository.GetDanhSachNhanVien();
                 comboBox2.DataSource = dtNV;
                 comboBox2.DisplayMember = "TenNV";
                 comboBox2.ValueMember = "MaNV";
@@ -61,7 +62,7 @@ namespace QLNongSan.UI
                 comboBox3.SelectedIndex = 0;
 
                 // Sản phẩm
-                DataTable dtSP = banHangDAL.GetDanhSachSanPham();
+                DataTable dtSP = application.salesRepository.GetDanhSachSanPham();
                 comboBox4.DataSource = dtSP;
                 comboBox4.DisplayMember = "TenSP";
                 comboBox4.ValueMember = "MaSP";
@@ -83,7 +84,7 @@ namespace QLNongSan.UI
         {
             if (comboBox4.SelectedValue == null) return;
             string tenSP = comboBox4.Text;
-            DataRow row = banHangDAL.GetSanPhamByTen(tenSP);
+            DataRow row = application.salesRepository.GetSanPhamByTen(tenSP);
             if (row != null)
             {
                 textBox3.Text = row["GiaBan"].ToString();   // Giá bán
@@ -234,7 +235,7 @@ namespace QLNongSan.UI
                 TongThanhToan = decimal.TryParse(
                     textBox6.Text.Replace(" VNĐ", "").Replace(",", ""), out decimal t) ? t : 0
             };
-            return banHangDAL.LuuPhieuBan(phieu, dtChiTiet);
+            return application.salesRepository.LuuPhieuBan(phieu, dtChiTiet);
         }
 
         // Hủy/reset toàn bộ form

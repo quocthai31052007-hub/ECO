@@ -1,12 +1,19 @@
+# Note: This Dockerfile is only valid for development, do not use it for production
 services:
   admin-db:
     image: mcr.microsoft.com/mssql/server:2025-latest
     ports:
       - 14331:1433
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Quanlynongsan@123
-      - MSSQL_PID=Developer
+      ACCEPT_EULA: Y
+      MSSQL_USER: QuanLyNongSan
+      # https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy?view=sql-server-ver17
+      MSSQL_PASSWORD: Qlns@123!
+      MSSQL_DB: QuanLyNongSan
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: Qlns@123!
+    volumes:
+      - ./sql:/run-sql
 networks:
   admin-network:
     driver: bridge
