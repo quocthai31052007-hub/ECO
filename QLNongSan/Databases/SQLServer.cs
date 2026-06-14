@@ -3,12 +3,25 @@ namespace QLNongSan.Databases
 {
     using Microsoft.Data.SqlClient;
 
-    // Database factory - manages connection pooling and is responsible for creating connnection in stateless repositories/DALs
+    // Database factory - manages connection pooling and is responsible for creating connection in stateless repositories/DALs
     public class SQLServerFactory
     {
-
         private readonly string connectionString;
 
+        // Constructor dùng Windows Authentication (Integrated Security)
+        public SQLServerFactory(string serverName, string databaseName)
+        {
+            connectionString = new SqlConnectionStringBuilder()
+            {
+                DataSource = serverName,
+                InitialCatalog = databaseName,
+                IntegratedSecurity = true,
+                TrustServerCertificate = true,
+                Encrypt = false
+            }.ConnectionString;
+        }
+
+        // Constructor dùng SQL Authentication (giữ lại nếu cần dùng)
         public SQLServerFactory(string serverName, string databaseName, string userName, string password)
         {
             connectionString = new SqlConnectionStringBuilder()
@@ -17,11 +30,7 @@ namespace QLNongSan.Databases
                 InitialCatalog = databaseName,
                 UserID = userName,
                 Password = password,
-
-                // SỬA TẠI ĐÂY: Tắt mã hóa kết nối bắt buộc để chạy nội bộ mượt mà
                 Encrypt = false,
-
-                // Hoặc nếu để Encrypt = true, bạn bắt buộc phải có dòng dưới:
                 TrustServerCertificate = true
             }.ConnectionString;
         }

@@ -1,24 +1,25 @@
-﻿namespace QLNongSan.schemas
+namespace QLNongSan.Models
 {
-    public class ThongTinLoDTO
+    /// <summary>
+    /// Đại diện cho một lô hàng nông sản trong cơ sở dữ liệu.
+    /// Các trường khớp chính xác với bảng ThongTinLo.
+    /// </summary>
+    public class ThongTinLo
     {
-        public string MaLo { get; set; }
-        public string TenLo { get; set; }
+        public string MaLo { get; set; } = string.Empty;
+        public string TenLo { get; set; } = string.Empty;
+        public decimal SoLuong { get; set; }
+        public string? DonViNhap { get; set; } = string.Empty;
 
-        // Thông tin nhập lô
-        public int SoLuongNhap { get; set; }
-        public string NgayNhap { get; set; }
-        public string DonViNhap { get; set; }
+        // Khóa ngoại — nullable vì ComboBox có thể chưa chọn
+        public int? MaKH { get; set; }
+        public int? MaSP { get; set; }
+        public int? MaPN { get; set; }
 
-        // Thông tin người mua lô
-        public string MaKH { get; set; }
-        public string HoTenKH { get; set; }   // Join từ KhachHang
-        public string NgayMua { get; set; }
-        public string ThongTinLienHe { get; set; }
-
-        public string TrangThai { get; set; }
-        public string GhiChu { get; set; }
-
-        public ThongTinLoDTO() { }
+        public DateTime NgayNhap { get; set; } = DateTime.Now;
+        public DateTime NgayMua { get; set; } = DateTime.Now;
+        public string? GhiChu { get; set; } = string.Empty;
+        public string? LienHe { get; set; } = string.Empty;
+        public string? TrangThai { get; set; } = string.Empty;
     }
 }

@@ -37,6 +37,7 @@
             pnlContent = new Panel();
             panel1 = new Panel();
             btnKhachHang = new Button();
+            btnThongTinLo = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -113,6 +114,7 @@
             button6.Text = "📊       Báo cáo";
             button6.TextAlign = ContentAlignment.MiddleLeft;
             button6.UseVisualStyleBackColor = true;
+            button6.Click += button6_Click;
             // 
             // pnlContent
             // 
@@ -124,6 +126,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(btnThongTinLo);
             panel1.Controls.Add(btnKhachHang);
             panel1.Dock = DockStyle.Left;
             panel1.Location = new Point(0, 0);
@@ -143,6 +146,18 @@
             btnKhachHang.TextAlign = ContentAlignment.MiddleLeft;
             btnKhachHang.UseVisualStyleBackColor = true;
             btnKhachHang.Click += button7_Click;
+            // 
+            // btnThongTinLo
+            // 
+            btnThongTinLo.Location = new Point(16, 560);
+            btnThongTinLo.Margin = new Padding(4);
+            btnThongTinLo.Name = "btnThongTinLo";
+            btnThongTinLo.Size = new Size(270, 60);
+            btnThongTinLo.TabIndex = 12;
+            btnThongTinLo.Text = "📝       Thông in lô";
+            btnThongTinLo.TextAlign = ContentAlignment.MiddleLeft;
+            btnThongTinLo.UseVisualStyleBackColor = true;
+            btnThongTinLo.Click += btnThongTinLo_Click;
             // 
             // AdminForm
             // 
@@ -175,5 +190,6 @@
         private Panel pnlContent;
         private Panel panel1;
         private Button btnKhachHang;
+        private Button btnThongTinLo;
     }
 }

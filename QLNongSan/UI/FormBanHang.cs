@@ -3,7 +3,6 @@ using QLNongSan.schemas;
 using System;
 using System.Data;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace QLNongSan.UI
 {
@@ -20,6 +19,9 @@ namespace QLNongSan.UI
             InitializeComponent();
         }
 
+        // ═══════════════════════════════════════════
+        // LOAD FORM
+        // ═══════════════════════════════════════════
         private void FormBanHang_Load(object sender, EventArgs e)
         {
             KhoiTaoChiTiet();
@@ -27,7 +29,7 @@ namespace QLNongSan.UI
             TaoMaPBMoi();
         }
 
-        // Khởi tạo cột cho bảng chi tiết tạm
+        // Khởi tạo cột cho DataTable tạm
         private void KhoiTaoChiTiet()
         {
             dtChiTiet.Columns.Add("MaSP");
@@ -37,104 +39,129 @@ namespace QLNongSan.UI
             dtChiTiet.Columns.Add("SoLuong", typeof(int));
             dtChiTiet.Columns.Add("ChietKhau", typeof(decimal));
             dtChiTiet.Columns.Add("ThanhTien", typeof(decimal));
-            dataGridView1.DataSource = dtChiTiet;
+
+            // Bind sang DataGridView với tên cột khớp designer
+            dgvChiTiet.AutoGenerateColumns = false;
+            colMaSP.DataPropertyName = "MaSP";
+            colTenSP.DataPropertyName = "TenSP";
+            colDVT.DataPropertyName = "DVT";
+            colGiaBan.DataPropertyName = "GiaBan";
+            colSoLuong.DataPropertyName = "SoLuong";
+            colChietKhau.DataPropertyName = "ChietKhau";
+            colThanhTien.DataPropertyName = "ThanhTien";
+
+            dgvChiTiet.DataSource = dtChiTiet;
         }
 
-        // Đổ dữ liệu vào các ComboBox
+        // Đổ dữ liệu vào các ComboBox từ DB
+        // LƯU Ý: phải set DisplayMember/ValueMember TRƯỚC DataSource
         private void LoadComboBoxes()
         {
             try
             {
                 // Khách hàng
                 DataTable dtKH = application.salesRepository.GetDanhSachKhachHang();
-                comboBox1.DataSource = dtKH;
-                comboBox1.DisplayMember = "TenKH";
-                comboBox1.ValueMember = "MaKH";
+                cboKhachHang.DisplayMember = "TenKH";
+                cboKhachHang.ValueMember = "MaKH";
+                cboKhachHang.DataSource = dtKH;
 
-                // Nhân viên bán
+                // Nhân viên — tự detect tên cột hiển thị để tránh hiện MaNV
                 DataTable dtNV = application.salesRepository.GetDanhSachNhanVien();
-                comboBox2.DataSource = dtNV;
-                comboBox2.DisplayMember = "TenNV";
-                comboBox2.ValueMember = "MaNV";
+                // DAL: SELECT MaNV, HoTen AS TenNV => cột trả về là "MaNV" và "TenNV"
+                string displayCol = "TenNV";
+                string valueCol = "MaNV";
+                cboNhanVien.DisplayMember = displayCol;
+                cboNhanVien.ValueMember = valueCol;
+                cboNhanVien.DataSource = dtNV;
 
                 // Phương thức thanh toán
-                comboBox3.Items.AddRange(new string[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng" });
-                comboBox3.SelectedIndex = 0;
+                if (cboPTTT.Items.Count == 0)
+                    cboPTTT.Items.AddRange(new string[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng" });
+                cboPTTT.SelectedIndex = 0;
 
                 // Sản phẩm
                 DataTable dtSP = application.salesRepository.GetDanhSachSanPham();
-                comboBox4.DataSource = dtSP;
-                comboBox4.DisplayMember = "TenSP";
-                comboBox4.ValueMember = "MaSP";
+                cboSanPham.DisplayMember = "TenSP";
+                cboSanPham.ValueMember = "MaSP";
+                cboSanPham.DataSource = dtSP;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message);
+                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message, "Lỗi",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Tự tạo mã phiếu bán mới theo ngày
+        // Tự sinh mã phiếu bán theo ngày giờ
         private void TaoMaPBMoi()
         {
-            textBox2.Text = "PB" + DateTime.Now.ToString("yyyyMMddHHmm");
+            txtMaPB.Text = "PB" + DateTime.Now.ToString("yyyyMMddHHmm");
         }
 
-        // Khi chọn sản phẩm → tự điền giá bán, DVT
-        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // SỰ KIỆN COMBOBOX SẢN PHẨM
+        // ═══════════════════════════════════════════
+        private void cboSanPham_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox4.SelectedValue == null) return;
-            string tenSP = comboBox4.Text;
+            if (cboSanPham.SelectedValue == null) return;
+
+            string tenSP = cboSanPham.Text;
             DataRow row = application.salesRepository.GetSanPhamByTen(tenSP);
             if (row != null)
             {
-                textBox3.Text = row["GiaBan"].ToString();   // Giá bán
-                comboBox5.Text = row["DVT"].ToString();     // Đơn vị tính
+                txtGiaBan.Text = row["GiaBan"].ToString();
+                cboDVT.Text = row["DVT"].ToString();
             }
         }
 
-        // Tính thành tiền = giá bán * số lượng * (1 - chiết khấu/100)
+        // ═══════════════════════════════════════════
+        // TÍNH TOÁN
+        // ═══════════════════════════════════════════
         private decimal TinhThanhTien()
         {
-            decimal giaBan = decimal.TryParse(textBox3.Text, out decimal g) ? g : 0;
-            int soLuong = int.TryParse(textBox5.Text, out int sl) ? sl : 0;
-            decimal chietKhau = decimal.TryParse(textBox4.Text, out decimal ck) ? ck : 0;
-            return giaBan * soLuong * (1 - chietKhau / 100);
+            decimal giaBan = decimal.TryParse(txtGiaBan.Text, out decimal g) ? g : 0;
+            int soLuong = int.TryParse(txtSoLuong.Text, out int sl) ? sl : 0;
+            decimal chietKhau = decimal.TryParse(txtChietKhau.Text, out decimal ck) ? ck : 0;
+            return giaBan * soLuong * (1 - chietKhau / 100m);
         }
 
-        // Cập nhật tổng thanh toán
         private void CapNhatTong()
         {
             decimal tong = 0;
             foreach (DataRow row in dtChiTiet.Rows)
                 tong += Convert.ToDecimal(row["ThanhTien"]);
-            textBox6.Text = tong.ToString("N0") + " VNĐ";
+            txtTong.Text = tong.ToString("N0") + " VNĐ";
         }
 
-        // Nút Thêm sản phẩm vào chi tiết (button7)
-        private void button7_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: THÊM SẢN PHẨM (btnThem)
+        // ═══════════════════════════════════════════
+        private void btnThem_Click(object sender, EventArgs e)
         {
-            if (comboBox4.SelectedItem == null)
+            if (cboSanPham.SelectedItem == null)
             {
-                MessageBox.Show("Vui lòng chọn sản phẩm!", "Thông báo");
+                MessageBox.Show("Vui lòng chọn sản phẩm!", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (!int.TryParse(textBox5.Text, out int soLuong) || soLuong <= 0)
+            if (!int.TryParse(txtSoLuong.Text, out int soLuong) || soLuong <= 0)
             {
-                MessageBox.Show("Số lượng không hợp lệ!", "Thông báo");
+                MessageBox.Show("Số lượng không hợp lệ!", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             decimal thanhTien = TinhThanhTien();
-            DataTable dtSP = (DataTable)comboBox4.DataSource;
-            DataRow spRow = dtSP.Rows[comboBox4.SelectedIndex];
+            DataTable dtSP = (DataTable)cboSanPham.DataSource;
+            DataRow spRow = dtSP.Rows[cboSanPham.SelectedIndex];
 
             dtChiTiet.Rows.Add(
                 spRow["MaSP"].ToString(),
-                comboBox4.Text,
-                comboBox5.Text,
-                decimal.TryParse(textBox3.Text, out decimal g) ? g : 0,
+                cboSanPham.Text,
+                cboDVT.Text,
+                decimal.TryParse(txtGiaBan.Text, out decimal g) ? g : 0,
                 soLuong,
-                decimal.TryParse(textBox4.Text, out decimal ck) ? ck : 0,
+                decimal.TryParse(txtChietKhau.Text, out decimal ck) ? ck : 0,
                 thanhTien
             );
 
@@ -142,46 +169,66 @@ namespace QLNongSan.UI
             LamMoiChiTiet();
         }
 
-        // Nút Xóa dòng chi tiết (button8)
-        private void button8_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: XÓA DÒNG (btnXoa)
+        // ═══════════════════════════════════════════
+        private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.CurrentRow == null) return;
-            dtChiTiet.Rows.RemoveAt(dataGridView1.CurrentRow.Index);
+            if (dgvChiTiet.CurrentRow == null)
+            {
+                MessageBox.Show("Vui lòng chọn dòng cần xóa!", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            dtChiTiet.Rows.RemoveAt(dgvChiTiet.CurrentRow.Index);
             CapNhatTong();
         }
 
-        // Nút Sửa dòng chi tiết - điền lại lên form (button9)
-        private void button9_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: SỬA DÒNG (btnSua) — điền lại lên form
+        // ═══════════════════════════════════════════
+        private void btnSua_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.CurrentRow == null) return;
-            int idx = dataGridView1.CurrentRow.Index;
+            if (dgvChiTiet.CurrentRow == null)
+            {
+                MessageBox.Show("Vui lòng chọn dòng cần sửa!", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            int idx = dgvChiTiet.CurrentRow.Index;
             DataRow row = dtChiTiet.Rows[idx];
-            comboBox4.Text = row["TenSP"].ToString();
-            comboBox5.Text = row["DVT"].ToString();
-            textBox3.Text = row["GiaBan"].ToString();
-            textBox5.Text = row["SoLuong"].ToString();
-            textBox4.Text = row["ChietKhau"].ToString();
+
+            cboSanPham.Text = row["TenSP"].ToString();
+            cboDVT.Text = row["DVT"].ToString();
+            txtGiaBan.Text = row["GiaBan"].ToString();
+            txtSoLuong.Text = row["SoLuong"].ToString();
+            txtChietKhau.Text = row["ChietKhau"].ToString();
+
             dtChiTiet.Rows.RemoveAt(idx);
             CapNhatTong();
         }
 
-        // Nút Làm mới chi tiết (button10)
-        private void button10_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: LÀM MỚI CHI TIẾT (btnLamMoi)
+        // ═══════════════════════════════════════════
+        private void btnLamMoi_Click(object sender, EventArgs e)
         {
             LamMoiChiTiet();
         }
 
         private void LamMoiChiTiet()
         {
-            comboBox4.SelectedIndex = 0;
-            comboBox5.Text = "";
-            textBox3.Clear();
-            textBox4.Clear();
-            textBox5.Clear();
+            if (cboSanPham.Items.Count > 0) cboSanPham.SelectedIndex = 0;
+            cboDVT.Text = string.Empty;
+            txtGiaBan.Clear();
+            txtSoLuong.Clear();
+            txtChietKhau.Text = "0";
         }
 
-        // Nút THANH TOÁN & IN HÓA ĐƠN (button11)
-        private void button11_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: THANH TOÁN & IN HÓA ĐƠN (btnThanhToan)
+        // ═══════════════════════════════════════════
+        private void btnThanhToan_Click(object sender, EventArgs e)
         {
             string ketQua = LuuPhieu();
             if (ketQua == "SUCCESS")
@@ -196,8 +243,10 @@ namespace QLNongSan.UI
             }
         }
 
-        // Nút LƯU PHIẾU BÁN (button13)
-        private void button13_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: LƯU PHIẾU BÁN (btnLuuPhieu)
+        // ═══════════════════════════════════════════
+        private void btnLuuPhieu_Click(object sender, EventArgs e)
         {
             string ketQua = LuuPhieu();
             if (ketQua == "SUCCESS")
@@ -212,50 +261,63 @@ namespace QLNongSan.UI
             }
         }
 
-        // Nút HỦY PHIẾU (button12)
-        private void button12_Click(object sender, EventArgs e)
+        // ═══════════════════════════════════════════
+        // NÚT: HỦY PHIẾU (btnHuyPhieu)
+        // ═══════════════════════════════════════════
+        private void btnHuyPhieu_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Bạn có chắc muốn hủy phiếu?", "Xác nhận",
+            if (MessageBox.Show("Bạn có chắc muốn hủy phiếu này?", "Xác nhận",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 HuyPhieu();
             }
         }
 
-        // Lưu phiếu vào DB
+        // ═══════════════════════════════════════════
+        // LƯU PHIẾU VÀO DB (HoaDon + ChiTietHoaDon)
+        // ═══════════════════════════════════════════
         private string LuuPhieu()
         {
+            // Validation phía form trước khi gọi DAL
+            if (cboNhanVien.SelectedValue == null || string.IsNullOrEmpty(cboNhanVien.SelectedValue.ToString()))
+                return "Vui lòng chọn nhân viên bán!";
+
+            if (dtChiTiet.Rows.Count == 0)
+                return "Chưa có sản phẩm nào trong phiếu!";
+
+            string maNV = cboNhanVien.SelectedValue.ToString();
+            string maKH = cboKhachHang.SelectedValue?.ToString() ?? string.Empty;
+
             PhieuBanDTO phieu = new PhieuBanDTO
             {
-                MaPB = textBox2.Text.Trim(),
-                KhachHang = comboBox1.Text,
-                NhanVienBan = comboBox2.Text,
-                NgayBan = dateTimePicker1.Value.ToString("yyyy-MM-dd"),
-                PhuongThucTT = comboBox3.Text,
+                MaPB = txtMaPB.Text.Trim(),
+                MaKH = maKH,          // DAL dùng MaKH
+                MaNV = maNV,          // DAL dùng MaNV
+                NgayBan = dtpNgayBan.Value.ToString("yyyy-MM-dd"),
+                PhuongThucTT = cboPTTT.Text,
                 TongThanhToan = decimal.TryParse(
-                    textBox6.Text.Replace(" VNĐ", "").Replace(",", ""), out decimal t) ? t : 0
+                    txtTong.Text.Replace(" VNĐ", "").Replace(",", ""),
+                    out decimal t) ? t : 0
             };
+
             return application.salesRepository.LuuPhieuBan(phieu, dtChiTiet);
         }
 
-        // Hủy/reset toàn bộ form
+        // ═══════════════════════════════════════════
+        // RESET TOÀN BỘ FORM
+        // ═══════════════════════════════════════════
         private void HuyPhieu()
         {
             dtChiTiet.Rows.Clear();
-            textBox6.Text = "0 VNĐ";
+            txtTong.Text = "0 VNĐ";
             TaoMaPBMoi();
-            comboBox1.SelectedIndex = 0;
-            comboBox2.SelectedIndex = 0;
-            comboBox3.SelectedIndex = 0;
-            dateTimePicker1.Value = DateTime.Now;
+
+            if (cboKhachHang.Items.Count > 0) cboKhachHang.SelectedIndex = 0;
+            if (cboNhanVien.Items.Count > 0) cboNhanVien.SelectedIndex = 0;
+            cboPTTT.SelectedIndex = 0;
+            dtpNgayBan.Value = DateTime.Now;
+
             LamMoiChiTiet();
-        }
-
-        private void pnlContent_Paint(object sender, PaintEventArgs e) { }
-
-        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
-        {
-
         }
     }
 }

@@ -1,114 +1,171 @@
-﻿using System;
-using System.Data;
 using Microsoft.Data.SqlClient;
-using QLNongSan.schemas;
+using QLNongSan.Models;
+using System.Data;
 
 namespace QLNongSan.Repositories
 {
-    using Databases;
+    /// <summary>
+    /// Lớp truy cập dữ liệu cho ThongTinLo.
+    /// Chịu trách nhiệm toàn bộ giao tiếp với SQL Server.
+    /// </summary>
     public class ThongTinLoDAL
     {
-        public required SQLServerFactory factory;
-        // Lấy danh sách lô + thông tin khách hàng
-        public DataTable GetListLo()
+        public required Databases.SQLServerFactory factory { get; set; }
+
+        // ─── READ ────────────────────────────────────────────────────────────
+
+        /// <summary>Lấy toàn bộ danh sách lô hàng.</summary>
+        public DataTable GetAll()
         {
-            DataTable dt = new DataTable();
-            string query = @"SELECT l.MaLo, l.TenLo, l.SoLuongNhap, l.NgayNhap, l.DonViNhap,
-                             k.HoTen as HoTenKH, k.SDT as SDT_KH,
-                             l.NgayMua, l.ThongTinLienHe, l.TrangThai, l.GhiChu
-                             FROM ThongTinLo l
-                             LEFT JOIN KhachHang k ON l.MaKH = k.MaKH";
-            using (SqlConnection conn = factory.GetConnection())
-            using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
-                adapter.Fill(dt);
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+            string query = "SELECT * FROM ThongTinLo";
+            SqlDataAdapter da = new(query, conn);
+            DataTable dt = new();
+            da.Fill(dt);
             return dt;
         }
 
-        public string AddLo(ThongTinLoDTO lo)
+        /// <summary>Lấy danh sách combo cho KhachHang (MaKH, HoTen).</summary>
+        public DataTable GetKhachHangCombo()
         {
-            if (string.IsNullOrWhiteSpace(lo.MaLo) || string.IsNullOrWhiteSpace(lo.TenLo))
-                return "Vui lòng nhập Mã và Tên lô!";
-            string query = @"INSERT INTO ThongTinLo (MaLo, TenLo, SoLuongNhap, NgayNhap, DonViNhap,
-                             MaKH, NgayMua, ThongTinLienHe, TrangThai, GhiChu)
-                             VALUES (@MaLo, @TenLo, @SoLuongNhap, @NgayNhap, @DonViNhap,
-                             @MaKH, @NgayMua, @ThongTinLienHe, @TrangThai, @GhiChu)";
-            using (SqlConnection conn = factory.GetConnection())
-            using (SqlCommand cmd = new SqlCommand(query, conn))
-            {
-                try
-                {
-                    cmd.Parameters.AddWithValue("@MaLo", lo.MaLo);
-                    cmd.Parameters.AddWithValue("@TenLo", lo.TenLo);
-                    cmd.Parameters.AddWithValue("@SoLuongNhap", lo.SoLuongNhap);
-                    cmd.Parameters.AddWithValue("@NgayNhap", lo.NgayNhap);
-                    cmd.Parameters.AddWithValue("@DonViNhap", lo.DonViNhap ?? "");
-                    cmd.Parameters.AddWithValue("@MaKH", string.IsNullOrEmpty(lo.MaKH) ? (object)DBNull.Value : lo.MaKH);
-                    cmd.Parameters.AddWithValue("@NgayMua", string.IsNullOrEmpty(lo.NgayMua) ? (object)DBNull.Value : lo.NgayMua);
-                    cmd.Parameters.AddWithValue("@ThongTinLienHe", lo.ThongTinLienHe ?? "");
-                    cmd.Parameters.AddWithValue("@TrangThai", lo.TrangThai ?? "Còn hàng");
-                    cmd.Parameters.AddWithValue("@GhiChu", lo.GhiChu ?? "");
-                    conn.Open();
-                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Thêm thất bại!";
-                }
-                catch (Exception ex) { return "Lỗi: " + ex.Message; }
-            }
-        }
-
-        public string UpdateLo(ThongTinLoDTO lo)
-        {
-            if (string.IsNullOrWhiteSpace(lo.MaLo)) return "Vui lòng chọn lô!";
-            string query = @"UPDATE ThongTinLo SET TenLo=@TenLo, SoLuongNhap=@SoLuongNhap,
-                             NgayNhap=@NgayNhap, DonViNhap=@DonViNhap, MaKH=@MaKH,
-                             NgayMua=@NgayMua, ThongTinLienHe=@ThongTinLienHe,
-                             TrangThai=@TrangThai, GhiChu=@GhiChu WHERE MaLo=@MaLo";
-            using (SqlConnection conn = factory.GetConnection())
-            using (SqlCommand cmd = new SqlCommand(query, conn))
-            {
-                try
-                {
-                    cmd.Parameters.AddWithValue("@MaLo", lo.MaLo);
-                    cmd.Parameters.AddWithValue("@TenLo", lo.TenLo);
-                    cmd.Parameters.AddWithValue("@SoLuongNhap", lo.SoLuongNhap);
-                    cmd.Parameters.AddWithValue("@NgayNhap", lo.NgayNhap);
-                    cmd.Parameters.AddWithValue("@DonViNhap", lo.DonViNhap ?? "");
-                    cmd.Parameters.AddWithValue("@MaKH", string.IsNullOrEmpty(lo.MaKH) ? (object)DBNull.Value : lo.MaKH);
-                    cmd.Parameters.AddWithValue("@NgayMua", string.IsNullOrEmpty(lo.NgayMua) ? (object)DBNull.Value : lo.NgayMua);
-                    cmd.Parameters.AddWithValue("@ThongTinLienHe", lo.ThongTinLienHe ?? "");
-                    cmd.Parameters.AddWithValue("@TrangThai", lo.TrangThai ?? "Còn hàng");
-                    cmd.Parameters.AddWithValue("@GhiChu", lo.GhiChu ?? "");
-                    conn.Open();
-                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Không tìm thấy!";
-                }
-                catch (Exception ex) { return "Lỗi: " + ex.Message; }
-            }
-        }
-
-        public string DeleteLo(string maLo)
-        {
-            if (string.IsNullOrWhiteSpace(maLo)) return "Vui lòng chọn lô!";
-            string query = "DELETE FROM ThongTinLo WHERE MaLo=@MaLo";
-            using (SqlConnection conn = factory.GetConnection())
-            using (SqlCommand cmd = new SqlCommand(query, conn))
-            {
-                try
-                {
-                    cmd.Parameters.AddWithValue("@MaLo", maLo);
-                    conn.Open();
-                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Không tìm thấy!";
-                }
-                catch (Exception ex) { return "Lỗi: " + ex.Message; }
-            }
-        }
-
-        // Lấy danh sách khách hàng cho ComboBox
-        public DataTable GetDanhSachKhachHang()
-        {
-            DataTable dt = new DataTable();
-            string query = "SELECT MaKH, HoTen FROM KhachHang";
-            using (SqlConnection conn = factory.GetConnection())
-            using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
-                adapter.Fill(dt);
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+            SqlDataAdapter da = new("SELECT MaKH, HoTen FROM KhachHang ORDER BY HoTen", conn);
+            DataTable dt = new();
+            da.Fill(dt);
             return dt;
+        }
+
+        /// <summary>Lấy danh sách combo cho SanPham (MaSP, TenSP).</summary>
+        public DataTable GetSanPhamCombo()
+        {
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+            SqlDataAdapter da = new("SELECT MaSP, TenSP FROM SanPham ORDER BY TenSP", conn);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
+        }
+
+        /// <summary>Lấy danh sách combo cho PhieuNhap (MaPN).</summary>
+        public DataTable GetPhieuNhapCombo()
+        {
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+            SqlDataAdapter da = new("SELECT MaPN FROM PhieuNhap ORDER BY MaPN", conn);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
+        }
+
+        // ─── CREATE ──────────────────────────────────────────────────────────
+
+        /// <summary>Thêm một lô hàng mới vào cơ sở dữ liệu.</summary>
+        public void Insert(ThongTinLo lo)
+        {
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+
+            const string query = @"
+                INSERT INTO ThongTinLo
+                    (MaLo, SoLuong, DonViNhap, MaKH, MaSP, MaPN,
+                     TenLo, NgayNhap, GhiChu, NgayMua, LienHe, TrangThai)
+                VALUES
+                    (@MaLo, @SoLuong, @DonViNhap, @MaKH, @MaSP, @MaPN,
+                     @TenLo, @NgayNhap, @GhiChu, @NgayMua, @LienHe, @TrangThai)";
+
+            using SqlCommand cmd = new(query, conn);
+            MapParameters(cmd, lo);
+            cmd.ExecuteNonQuery();
+        }
+
+        public ThongTinLo? GetById(string maLo)
+        {
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+            SqlCommand cmd = new("SELECT * FROM ThongTinLo WHERE MaLo = @MaLo", conn);
+            cmd.Parameters.AddWithValue("@MaLo", maLo);
+            var reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                return new ThongTinLo
+                {
+                    MaLo = reader["MaLo"].ToString() ?? throw new Exception("MaLo is required"),
+                    SoLuong = Convert.ToDecimal(reader["SoLuongNhap"] ?? throw new Exception("SoLuongNhap is required")),
+                    DonViNhap = reader["DonViNhap"]?.ToString(),
+                    MaKH = reader["MaKH"] != null && reader["MaKH"] != DBNull.Value ? Convert.ToInt32(reader["MaKH"]) : null,
+                    MaSP = reader["MaSP"] != null && reader["MaSP"] != DBNull.Value ? Convert.ToInt32(reader["MaSP"]) : null,
+                    MaPN = reader["MaPN"] != null && reader["MaPN"] != DBNull.Value ? Convert.ToInt32(reader["MaPN"]) : null,
+                    TenLo = reader["TenLo"].ToString() ?? throw new Exception("TenLo is required"),
+                    NgayNhap = Convert.ToDateTime(reader["NgayNhap"]),
+                    GhiChu = reader["GhiChu"]?.ToString(),
+                    NgayMua = Convert.ToDateTime(reader["NgayMua"]),
+                    LienHe = reader["ThongTinLienHe"]?.ToString(),
+                    TrangThai = reader["TrangThai"]?.ToString(),
+                };
+            }
+            return null;
+        }
+
+        // ─── UPDATE ──────────────────────────────────────────────────────────
+
+        /// <summary>Cập nhật thông tin lô hàng đã tồn tại.</summary>
+        public void Update(ThongTinLo lo)
+        {
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+
+            const string query = @"
+                UPDATE ThongTinLo SET
+                    SoLuong  = @SoLuong,
+                    DonViNhap    = @DonViNhap,
+                    MaKH     = @MaKH,
+                    MaSP     = @MaSP,
+                    MaPN     = @MaPN,
+                    TenLo    = @TenLo,
+                    NgayNhap = @NgayNhap,
+                    GhiChu   = @GhiChu,
+                    NgayMua  = @NgayMua,
+                    LienHe   = @LienHe,
+                    TrangThai= @TrangThai
+                WHERE MaLo = @MaLo";
+
+            using SqlCommand cmd = new(query, conn);
+            MapParameters(cmd, lo);
+            cmd.ExecuteNonQuery();
+        }
+
+        // ─── DELETE ──────────────────────────────────────────────────────────
+
+        /// <summary>Xóa lô hàng theo mã.</summary>
+        public void Delete(string maLo)
+        {
+            using SqlConnection conn = factory.GetConnection();
+            conn.Open();
+
+            using SqlCommand cmd = new("DELETE FROM ThongTinLo WHERE MaLo = @MaLo", conn);
+            cmd.Parameters.AddWithValue("@MaLo", maLo);
+            cmd.ExecuteNonQuery();
+        }
+
+        // ─── PRIVATE HELPERS ─────────────────────────────────────────────────
+
+        /// <summary>Gán tham số SQL dùng chung cho Insert và Update.</summary>
+        private static void MapParameters(SqlCommand cmd, ThongTinLo lo)
+        {
+            cmd.Parameters.AddWithValue("@MaLo", lo.MaLo);
+            cmd.Parameters.AddWithValue("@SoLuong", lo.SoLuong);
+            cmd.Parameters.AddWithValue("@DonViNhap", lo.DonViNhap);
+            cmd.Parameters.AddWithValue("@MaKH", (object?)lo.MaKH ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@MaSP", (object?)lo.MaSP ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@MaPN", (object?)lo.MaPN ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@TenLo", lo.TenLo);
+            cmd.Parameters.AddWithValue("@NgayNhap", lo.NgayNhap);
+            cmd.Parameters.AddWithValue("@GhiChu", lo.GhiChu);
+            cmd.Parameters.AddWithValue("@NgayMua", lo.NgayMua);
+            cmd.Parameters.AddWithValue("@LienHe", lo.LienHe);
+            cmd.Parameters.AddWithValue("@TrangThai", lo.TrangThai);
         }
     }
 }

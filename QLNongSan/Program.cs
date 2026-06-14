@@ -44,6 +44,7 @@ namespace QLNongSan
             };
             var reportRepository = new Repositories.BaoCaoDAL
             {
+                factory = sqlServerFactory,
             };
             var employeeRepository = new Repositories.NhanVienDAL
             {

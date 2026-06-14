@@ -1,65 +1,83 @@
+using Microsoft.Data.SqlClient;
+using QLNongSan.Databases;
 using QLNongSan.schemas;
-using System.Collections.Generic;
+using System;
 using System.Data;
 
 namespace QLNongSan.Repositories
 {
     public class BaoCaoDAL
     {
-        // In-memory list acting as the data store (replace with DB calls as needed)
-        private static List<BaoCaoDTO> _dsBaoCao = new List<BaoCaoDTO>();
-        private static int _nextId = 1;
+        public required SQLServerFactory factory;
 
-        /// <summary>
-        /// Lấy toàn bộ danh sách báo cáo dưới dạng DataTable để bind vào DataGridView.
-        /// </summary>
         public DataTable GetAllBaoCao()
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("MaBaoCao",   typeof(int));
-            dt.Columns.Add("NgayBaoCao", typeof(string));
-            dt.Columns.Add("LoaiBaoCao", typeof(string));
-            dt.Columns.Add("NoiDung",    typeof(string));
-
-            foreach (BaoCaoDTO bc in _dsBaoCao)
-            {
-                dt.Rows.Add(bc.MaBaoCao, bc.NgayBaoCao, bc.LoaiBaoCao, bc.NoiDung);
-            }
-
+            string query = "SELECT MaBaoCao, NgayBaoCao, LoaiBaoCao, NoiDung FROM BaoCao ORDER BY MaBaoCao DESC";
+            using (SqlConnection conn = factory.GetConnection())
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                da.Fill(dt);
             return dt;
         }
 
-        /// <summary>
-        /// Thêm một báo cáo mới.
-        /// </summary>
-        public bool ThemBaoCao(BaoCaoDTO baoCao)
+        public bool ThemBaoCao(BaoCaoDTO bc)
         {
-            if (baoCao == null) return false;
-            if (string.IsNullOrWhiteSpace(baoCao.NoiDung)) return false;
-
-            baoCao.MaBaoCao = _nextId++;
-            _dsBaoCao.Add(baoCao);
-            return true;
+            if (bc == null || string.IsNullOrWhiteSpace(bc.NoiDung)) return false;
+            string query = @"INSERT INTO BaoCao (NgayBaoCao, LoaiBaoCao, NoiDung)
+                             VALUES (@NgayBaoCao, @LoaiBaoCao, @NoiDung)";
+            using (SqlConnection conn = factory.GetConnection())
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                try
+                {
+                    cmd.Parameters.AddWithValue("@NgayBaoCao", bc.NgayBaoCao);
+                    cmd.Parameters.AddWithValue("@LoaiBaoCao", bc.LoaiBaoCao);
+                    cmd.Parameters.AddWithValue("@NoiDung", bc.NoiDung);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+                catch { return false; }
+            }
         }
 
-        /// <summary>
-        /// Xóa báo cáo theo mã.
-        /// </summary>
         public bool XoaBaoCao(int maBaoCao)
         {
-            BaoCaoDTO target = _dsBaoCao.Find(bc => bc.MaBaoCao == maBaoCao);
-            if (target == null) return false;
-
-            _dsBaoCao.Remove(target);
-            return true;
+            string query = "DELETE FROM BaoCao WHERE MaBaoCao = @MaBaoCao";
+            using (SqlConnection conn = factory.GetConnection())
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                try
+                {
+                    cmd.Parameters.AddWithValue("@MaBaoCao", maBaoCao);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+                catch { return false; }
+            }
         }
 
-        /// <summary>
-        /// Lấy báo cáo theo mã.
-        /// </summary>
         public BaoCaoDTO GetBaoCaoById(int maBaoCao)
         {
-            return _dsBaoCao.Find(bc => bc.MaBaoCao == maBaoCao);
+            string query = "SELECT * FROM BaoCao WHERE MaBaoCao = @MaBaoCao";
+            using (SqlConnection conn = factory.GetConnection())
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@MaBaoCao", maBaoCao);
+                conn.Open();
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                        return new BaoCaoDTO
+                        {
+                            MaBaoCao = (int)r["MaBaoCao"],
+                            NgayBaoCao = r["NgayBaoCao"].ToString(),
+                            LoaiBaoCao = r["LoaiBaoCao"].ToString(),
+                            NoiDung = r["NoiDung"].ToString()
+                        };
+                }
+            }
+            return null;
         }
     }
 }

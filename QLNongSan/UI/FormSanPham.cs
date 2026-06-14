@@ -1,35 +1,30 @@
 ﻿using QLNongSan.Repositories;
 using QLNongSan.schemas;
 using System;
-using System.Data;
+using System.Data; // BẮT BUỘC để nhận diện DataRowView
 using System.Windows.Forms;
-
+using System.Drawing;
 namespace QLNongSan.UI
 {
     public partial class FormSanPham : Form
     {
         private readonly Application application;
-        public FormSanPham(
-            Application application
-        )
+        public FormSanPham(Application application)
         {
             this.application = application;
             InitializeComponent();
+            // Giữ nguyên logic liên kết sự kiện
             this.Load += FormSanPham_Load;
             this.btnThem.Click += btnThem_Click;
             this.btnSua.Click += btnSua_Click;
             this.btnXoa.Click += btnXoa_Click;
             this.btnLamMoi.Click += btnLamMoi_Click;
-            this.dgvSanPham.CellClick += dgvSanPham_CellClick;
         }
 
         private void FormSanPham_Load(object sender, EventArgs e)
         {
             HienThiDanhSachSanPham();
             LoadLoaiHang();
-            txtMaSP.ReadOnly = true;
-            txtMaSP.BackColor = Color.LightGray;
-            dgvSanPham.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void LoadLoaiHang()
@@ -202,12 +197,43 @@ namespace QLNongSan.UI
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             txtMaSP.Clear();
+            txtMaSP.BackColor = Color.FromArgb(60, 60, 60);
             txtTenSP.Clear();
             txtDVT.Clear();
             txtSoLuongTon.Clear();
             txtGiaBan.Clear();
             cboLoaiHang.SelectedIndex = -1;
             txtTenSP.Focus();
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtDVT_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtSoLuongTon_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

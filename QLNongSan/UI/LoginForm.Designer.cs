@@ -36,6 +36,7 @@
             label4 = new Label();
             txtUsername = new TextBox();
             txtPassword = new TextBox();
+            button2 = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -129,6 +130,19 @@
             txtPassword.Size = new Size(428, 34);
             txtPassword.TabIndex = 13;
             // 
+            // button2
+            // 
+            button2.BackColor = Color.Navy;
+            button2.Font = new Font("Segoe UI", 10F);
+            button2.ForeColor = Color.White;
+            button2.Location = new Point(1199, 676);
+            button2.Name = "button2";
+            button2.Size = new Size(209, 34);
+            button2.TabIndex = 14;
+            button2.Text = "Dành cho Khách Hàng";
+            button2.UseVisualStyleBackColor = false;
+            button2.Click += BtnKhachHang_Click;
+            // 
             // LoginForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -136,6 +150,7 @@
             BackgroundImage = Properties.Resources.b4cbf297_1c79_4ffe_aed8_ce9a1b28ffc9;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1902, 1033);
+            Controls.Add(button2);
             Controls.Add(txtPassword);
             Controls.Add(txtUsername);
             Controls.Add(label4);
@@ -149,6 +164,7 @@
             MaximizeBox = false;
             Name = "LoginForm";
             Text = "Form1";
+            Load += LoginForm_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -163,5 +179,6 @@
         private Label label3;
         private Label label4;
         private TextBox txtPassword;
+        private Button button2;
     }
 }

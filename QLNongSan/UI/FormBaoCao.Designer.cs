@@ -39,10 +39,10 @@
             LoaiBC = new ComboBox();
             NgayBC = new DateTimePicker();
             dataGridView1 = new DataGridView();
-            txtNoiDung = new RichTextBox();
             Ngay = new DataGridViewTextBoxColumn();
             Loai = new DataGridViewTextBoxColumn();
             colNoiDung = new DataGridViewTextBoxColumn();
+            txtNoiDung = new RichTextBox();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
@@ -62,10 +62,11 @@
             groupBox1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             groupBox1.Location = new Point(100, 100);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(517, 833);
+            groupBox1.Size = new Size(498, 833);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "BÁO CÁO";
+            groupBox1.Enter += groupBox1_Enter_2;
             // 
             // btnXuatPDF
             // 
@@ -158,26 +159,18 @@
             // 
             // dataGridView1
             // 
+            dataGridView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Columns.AddRange(new DataGridViewColumn[] { Ngay, Loai, colNoiDung });
-            dataGridView1.Location = new Point(623, 100);
+            dataGridView1.Location = new Point(604, 100);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersVisible = false;
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(518, 833);
+            dataGridView1.Size = new Size(545, 833);
             dataGridView1.TabIndex = 1;
             dataGridView1.CellClick += dataGridView1_CellClick;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
-            // 
-            // txtNoiDung
-            // 
-            txtNoiDung.Dock = DockStyle.Right;
-            txtNoiDung.Location = new Point(1147, 100);
-            txtNoiDung.Name = "txtNoiDung";
-            txtNoiDung.Size = new Size(655, 833);
-            txtNoiDung.TabIndex = 2;
-            txtNoiDung.Text = "";
             // 
             // Ngay
             // 
@@ -200,11 +193,19 @@
             colNoiDung.Name = "colNoiDung";
             colNoiDung.Visible = false;
             // 
+            // txtNoiDung
+            // 
+            txtNoiDung.Dock = DockStyle.Right;
+            txtNoiDung.Location = new Point(1147, 100);
+            txtNoiDung.Name = "txtNoiDung";
+            txtNoiDung.Size = new Size(655, 833);
+            txtNoiDung.TabIndex = 2;
+            txtNoiDung.Text = "";
+            // 
             // FormBaoCao
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = Properties.Resources.Untitled;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1902, 1033);
             Controls.Add(txtNoiDung);

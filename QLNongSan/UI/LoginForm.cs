@@ -1,4 +1,4 @@
-using System.Data.SqlClient;
+using QLNongSan.UI;
 
 namespace QLNongSan.UI
 {
@@ -48,5 +48,45 @@ namespace QLNongSan.UI
         {
 
         }
+
+        private void btnKhachHang_Click(object sender, EventArgs e)
+        {
+
+            this.Hide();
+
+
+            FormUserKhachHang fKhachHang = new FormUserKhachHang(application);
+
+
+            fKhachHang.ShowDialog();
+
+
+            this.Close();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void LoginForm_Load(object sender, EventArgs e)
+        {
+
+        }
+        private void BtnKhachHang_Click(object sender, EventArgs e)
+        {
+
+            this.Hide();
+
+
+            FormUserKhachHang fKhachHang = new FormUserKhachHang(application);
+
+
+            fKhachHang.ShowDialog();
+
+
+            this.Close();
+        }
+
     }
 }

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient; // Hoặc System.Data.SqlClient tùy thuộc thư viện bạn đang dùng
 
 namespace QLNongSan.UI
 {
@@ -34,27 +34,25 @@ namespace QLNongSan.UI
             dtChiTietTam.Columns.Add("MaSP", typeof(string));
             dtChiTietTam.Columns.Add("TenSP", typeof(string));
             dtChiTietTam.Columns.Add("SoLuong", typeof(int));
-            dtChiTietTam.Columns.Add("GiaNhap", typeof(decimal));
-
-            // Cột tự động tính toán: Thành tiền = Số lượng * Giá nhập
-            dtChiTietTam.Columns.Add("ThanhTien", typeof(decimal), "SoLuong * GiaNhap");
+            dtChiTietTam.Columns.Add("DonGiaNhap", typeof(decimal));
+            dtChiTietTam.Columns.Add("HanSuDung", typeof(DateTime));
+            dtChiTietTam.Columns.Add("ThanhTien", typeof(decimal), "SoLuong * DonGiaNhap");
 
             dgvChiTiet.DataSource = dtChiTietTam;
 
-            // Định dạng tiêu đề cột hiển thị lên màn hình
+            // Định dạng tiêu đề cột
             dgvChiTiet.Columns["MaSP"].HeaderText = "Mã Sản Phẩm";
             dgvChiTiet.Columns["TenSP"].HeaderText = "Tên Sản Phẩm";
             dgvChiTiet.Columns["SoLuong"].HeaderText = "Số Lượng";
-            dgvChiTiet.Columns["GiaNhap"].HeaderText = "Giá Nhập (VNĐ)";
+            dgvChiTiet.Columns["DonGiaNhap"].HeaderText = "Giá Nhập (VNĐ)";
+            dgvChiTiet.Columns["HanSuDung"].HeaderText = "Hạn Sử Dụng";
             dgvChiTiet.Columns["ThanhTien"].HeaderText = "Thành Tiền (VNĐ)";
 
-            // Định dạng hiển thị số tiền cho đẹp mắt
-            dgvChiTiet.Columns["GiaNhap"].DefaultCellStyle.Format = "#,##0";
+            dgvChiTiet.Columns["DonGiaNhap"].DefaultCellStyle.Format = "#,##0";
             dgvChiTiet.Columns["ThanhTien"].DefaultCellStyle.Format = "#,##0";
         }
 
         // Tự động tính tổng tiền từ bảng tạm và cập nhật lên giao diện
-        // Tìm đoạn code này:
         private void TinhTongTienHiaDon()
         {
             decimal tongTien = 0;
@@ -62,7 +60,6 @@ namespace QLNongSan.UI
             {
                 if (row["ThanhTien"] != DBNull.Value)
                 {
-                    // SỬA TẠI ĐÂY: Đổi 'toDecimal' thành 'ToDecimal' (Viết hoa chữ T)
                     tongTien += Convert.ToDecimal(row["ThanhTien"]);
                 }
             }
@@ -72,7 +69,7 @@ namespace QLNongSan.UI
         // --- TẢI DỮ LIỆU LÊN CÁC COMBOBOX ---
         private void LoadComboboxNhanVien()
         {
-            string query = "SELECT MaNV, HoTen FROM NhanVien"; // Đổi lại tên bảng/khóa nếu cần
+            string query = "SELECT MaNV, HoTen FROM NhanVien";
             FillCombo(query, cboNhanVien, "HoTen", "MaNV");
         }
 
@@ -100,7 +97,7 @@ namespace QLNongSan.UI
                     combo.DataSource = dt;
                     combo.DisplayMember = displayMember;
                     combo.ValueMember = valueMember;
-                    combo.SelectedIndex = -1; // Để trống mặc định ban đầu
+                    combo.SelectedIndex = -1;
                 }
             }
             catch (Exception ex)
@@ -121,21 +118,23 @@ namespace QLNongSan.UI
 
             string maSP = cboSanPham.SelectedValue.ToString();
             string tenSP = cboSanPham.Text;
+            DateTime hsd = dtpHanSuDung.Value;
 
-            // Kiểm tra xem sản phẩm đã có trong danh sách chuẩn bị nhập chưa, nếu có thì cộng dồn số lượng
+            // Kiểm tra xem sản phẩm đã có trong danh sách chưa, nếu có thì cộng dồn số lượng
             foreach (DataRow row in dtChiTietTam.Rows)
             {
                 if (row["MaSP"].ToString() == maSP)
                 {
                     row["SoLuong"] = Convert.ToInt32(row["SoLuong"]) + soLuong;
-                    row["GiaNhap"] = giaNhap; // Cập nhật lại giá nhập mới nhất
+                    row["DonGiaNhap"] = giaNhap;
+                    row["HanSuDung"] = hsd;
                     TinhTongTienHiaDon();
                     return;
                 }
             }
 
-            // Nếu là sản phẩm mới hoàn toàn thì thêm dòng mới vào bảng tạm
-            dtChiTietTam.Rows.Add(maSP, tenSP, soLuong, giaNhap);
+            // Nếu là sản phẩm mới thì thêm dòng mới vào bảng tạm
+            dtChiTietTam.Rows.Add(maSP, tenSP, soLuong, giaNhap, hsd);
             TinhTongTienHiaDon();
         }
 
@@ -151,7 +150,7 @@ namespace QLNongSan.UI
             }
         }
 
-        // 3. Thực hiện lưu toàn bộ hóa đơn nhập (Master-Detail) vào Database
+        // 3. Lưu toàn bộ hóa đơn nhập (Master-Detail) vào Database
         private void btnLuu_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtMaPN.Text)) { MessageBox.Show("Vui lòng nhập Mã phiếu nhập!"); return; }
@@ -162,24 +161,26 @@ namespace QLNongSan.UI
             using (SqlConnection conn = application.database.GetConnection())
             {
                 conn.Open();
-                // Sử dụng Transaction để đảm bảo an toàn: Thất bại một bước là hủy toàn bộ dữ liệu tránh lỗi rác
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     try
                     {
-                        // Bước 3.1: Lưu thông tin bảng chính (PhieuNhap)
-                        // Bỏ MaPN ra khỏi INSERT, để SQL tự sinh
-                        string sqlMaster = "INSERT INTO PhieuNhap (MaNV, MaNCC, NgayNhap) VALUES (@MaNV, @MaNCC, @NgayNhap)";
+                        // BUG FIX 1: Thêm bước lưu phiếu nhập (bảng master) TRƯỚC khi lưu chi tiết
+                        string sqlMaster = @"INSERT INTO PhieuNhap (MaPN, NgayNhap, MaNV, MaNCC)
+                                             VALUES (@MaPN, @NgayNhap, @MaNV, @MaNCC)";
                         using (SqlCommand cmdMaster = new SqlCommand(sqlMaster, conn, trans))
                         {
+                            cmdMaster.Parameters.AddWithValue("@MaPN", txtMaPN.Text.Trim());
+                            cmdMaster.Parameters.AddWithValue("@NgayNhap", dtpNgayNhap.Value);
                             cmdMaster.Parameters.AddWithValue("@MaNV", cboNhanVien.SelectedValue);
                             cmdMaster.Parameters.AddWithValue("@MaNCC", cboNhaCungCap.SelectedValue);
-                            cmdMaster.Parameters.AddWithValue("@NgayNhap", dtpNgayNhap.Value);
                             cmdMaster.ExecuteNonQuery();
                         }
 
-                        // Bước 3.2: Duyệt vòng lặp lưu chi tiết từng món hàng (ChiTietPhieuNhap)
-                        string sqlDetail = "INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, GiaNhap) VALUES (@MaPN, @MaSP, @SoLuong, @GiaNhap)";
+                        // BUG FIX 2: Chỉ lưu chi tiết MỘT LẦN (xóa vòng lặp thừa),
+                        // và dùng đúng tên cột "DonGiaNhap" thay vì "DonGia"
+                        string sqlDetail = @"INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGiaNhap, HanSuDung)
+                                             VALUES (@MaPN, @MaSP, @SoLuong, @DonGiaNhap, @HanSuDung)";
                         foreach (DataRow row in dtChiTietTam.Rows)
                         {
                             using (SqlCommand cmdDetail = new SqlCommand(sqlDetail, conn, trans))
@@ -187,26 +188,26 @@ namespace QLNongSan.UI
                                 cmdDetail.Parameters.AddWithValue("@MaPN", txtMaPN.Text.Trim());
                                 cmdDetail.Parameters.AddWithValue("@MaSP", row["MaSP"]);
                                 cmdDetail.Parameters.AddWithValue("@SoLuong", row["SoLuong"]);
-                                cmdDetail.Parameters.AddWithValue("@GiaNhap", row["GiaNhap"]);
+                                cmdDetail.Parameters.AddWithValue("@DonGiaNhap", row["DonGiaNhap"]); // BUG FIX 3: "DonGia" -> "DonGiaNhap"
+                                cmdDetail.Parameters.AddWithValue("@HanSuDung", row["HanSuDung"]);
                                 cmdDetail.ExecuteNonQuery();
                             }
                         }
 
-                        // Hoàn tất lưu dữ liệu thành công
                         trans.Commit();
                         MessageBox.Show("Lưu phiếu nhập hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LamMoiForm();
                     }
                     catch (Exception ex)
                     {
-                        trans.Rollback(); // Hủy bỏ thao tác nếu xuất hiện lỗi bất kỳ
+                        trans.Rollback();
                         MessageBox.Show("Lỗi hệ thống khi lưu phiếu nhập: " + ex.Message, "Lỗi nghiêm trọng", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
         }
 
-        // 4. Làm mới sạch sẽ form để chuẩn bị lên phiếu nhập tiếp theo
+        // 4. Làm mới form để chuẩn bị lên phiếu nhập tiếp theo
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             LamMoiForm();
@@ -214,7 +215,6 @@ namespace QLNongSan.UI
 
         private void LamMoiForm()
         {
-            // Tự động tạo mã phiếu nhập ngẫu nhiên theo thời gian thực (Tránh trùng lặp mã)
             txtMaPN.Text = "PN" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             cboNhanVien.SelectedIndex = -1;

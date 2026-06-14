@@ -6,16 +6,17 @@ using QLNongSan.schemas;
 namespace QLNongSan.Repositories
 {
     using Databases;
+
     public class NhanVienDAL
     {
         public required SQLServerFactory factory;
 
-        // Cột thực tế: MaNV, HoTen, Username, Password, VaiTro
+        // Lấy danh sách nhân viên — đã có SDT, DiaChi
         public DataTable GetListNhanVien()
         {
             DataTable dt = new DataTable();
-            // BỔ SUNG: Thêm SDT, DiaChi vào câu lệnh SELECT
-            string query = "SELECT MaNV, HoTen, Username, VaiTro, SDT, DiaChi FROM NhanVien";
+            // BUG FIX: Thêm SDT, DiaChi vào SELECT. Dùng VaiTro làm ChucVu vì DB không có cột ChucVu riêng
+            string query = "SELECT MaNV, HoTen, SDT, VaiTro AS ChucVu, DiaChi FROM NhanVien";
             using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
@@ -25,19 +26,23 @@ namespace QLNongSan.Repositories
 
         public string AddNhanVien(NhanVienDTO nv)
         {
-            if (string.IsNullOrWhiteSpace(nv.MaNV) || string.IsNullOrWhiteSpace(nv.TenNV))
-                return "Vui lòng nhập Mã và Tên nhân viên!";
-            string query = "INSERT INTO NhanVien (MaNV, HoTen, Username, Password, VaiTro) VALUES (@MaNV, @HoTen, @Username, @Password, @VaiTro)";
+            if (string.IsNullOrWhiteSpace(nv.TenNV))
+                return "Vui lòng nhập Tên nhân viên!";
+
+            // Bỏ MaNV ra khỏi INSERT — để DB tự tăng
+            string query = @"INSERT INTO NhanVien (HoTen, Username, Password, VaiTro, SDT, DiaChi)
+                     VALUES (@HoTen, @Username, @Password, @VaiTro, @SDT, @DiaChi)";
             using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 try
                 {
-                    cmd.Parameters.AddWithValue("@MaNV", nv.MaNV);
                     cmd.Parameters.AddWithValue("@HoTen", nv.TenNV);
-                    cmd.Parameters.AddWithValue("@Username", nv.MaNV);
+                    cmd.Parameters.AddWithValue("@Username", nv.TenNV.Replace(" ", "").ToLower());
                     cmd.Parameters.AddWithValue("@Password", "123456");
                     cmd.Parameters.AddWithValue("@VaiTro", nv.ChucVu ?? "Nhân viên");
+                    cmd.Parameters.AddWithValue("@SDT", (object)nv.SDT ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@DiaChi", (object)nv.DiaChi ?? DBNull.Value);
                     conn.Open();
                     return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Thêm thất bại!";
                 }
@@ -48,7 +53,11 @@ namespace QLNongSan.Repositories
         public string UpdateNhanVien(NhanVienDTO nv)
         {
             if (string.IsNullOrWhiteSpace(nv.MaNV)) return "Vui lòng chọn nhân viên!";
-            string query = "UPDATE NhanVien SET HoTen=@HoTen, VaiTro=@VaiTro WHERE MaNV=@MaNV";
+
+            // BUG FIX: Thêm SDT và DiaChi vào câu UPDATE (trước đây bị bỏ qua)
+            string query = @"UPDATE NhanVien 
+                             SET HoTen=@HoTen, VaiTro=@VaiTro, SDT=@SDT, DiaChi=@DiaChi
+                             WHERE MaNV=@MaNV";
             using (SqlConnection conn = factory.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
@@ -57,8 +66,10 @@ namespace QLNongSan.Repositories
                     cmd.Parameters.AddWithValue("@MaNV", nv.MaNV);
                     cmd.Parameters.AddWithValue("@HoTen", nv.TenNV);
                     cmd.Parameters.AddWithValue("@VaiTro", nv.ChucVu ?? "Nhân viên");
+                    cmd.Parameters.AddWithValue("@SDT", (object)nv.SDT ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@DiaChi", (object)nv.DiaChi ?? DBNull.Value);
                     conn.Open();
-                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Không tìm thấy!";
+                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Không tìm thấy nhân viên!";
                 }
                 catch (Exception ex) { return "Lỗi: " + ex.Message; }
             }
@@ -75,7 +86,7 @@ namespace QLNongSan.Repositories
                 {
                     cmd.Parameters.AddWithValue("@MaNV", maNV);
                     conn.Open();
-                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Không tìm thấy!";
+                    return cmd.ExecuteNonQuery() > 0 ? "SUCCESS" : "Không tìm thấy nhân viên!";
                 }
                 catch (Exception ex) { return "Lỗi: " + ex.Message; }
             }

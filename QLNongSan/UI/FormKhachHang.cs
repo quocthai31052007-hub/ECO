@@ -113,5 +113,10 @@ namespace QLNongSan.UI
         {
 
         }
+
+        private void txtMaKH_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
