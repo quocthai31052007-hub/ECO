@@ -32,6 +32,7 @@
             button1 = new Button();
             button3 = new Button();
             button2 = new Button();
+            button8 = new Button();
             SuspendLayout();
             // 
             // button1
@@ -45,7 +46,7 @@
             button1.TabIndex = 0;
             button1.Text = "Xuất mã QR";
             button1.UseVisualStyleBackColor = false;
-            button1.Click += button1_Click;
+            button1.Click += onInitQRExport;
             // 
             // button3
             // 
@@ -63,13 +64,25 @@
             // 
             button2.Font = new Font("Segoe UI", 20F);
             button2.ForeColor = Color.Navy;
-            button2.Location = new Point(709, 38);
+            button2.Location = new Point(742, 38);
             button2.Name = "button2";
             button2.Size = new Size(202, 71);
             button2.TabIndex = 3;
             button2.Text = "Tra cứu";
             button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            button2.Click += onInitLookupClick;
+            // 
+            // button8
+            // 
+            button8.Font = new Font("Segoe UI", 20F);
+            button8.ForeColor = Color.Navy;
+            button8.Location = new Point(454, 38);
+            button8.Name = "button8";
+            button8.Size = new Size(156, 71);
+            button8.TabIndex = 7;
+            button8.Text = "Trở Lại";
+            button8.UseVisualStyleBackColor = true;
+            button8.Click += btnTroLai_Click;
             // 
             // FormUserKhachHang
             // 
@@ -78,6 +91,7 @@
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1902, 1033);
+            Controls.Add(button8);
             Controls.Add(button2);
             Controls.Add(button3);
             Controls.Add(button1);
@@ -112,5 +126,7 @@
 
             MessageBox.Show(noiDung, tieuDe, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+        private Button button8;
     }
 }

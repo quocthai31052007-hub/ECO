@@ -271,11 +271,10 @@
             // 
             nudSoLuong.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             nudSoLuong.Location = new Point(130, 70);
+            nudSoLuong.Maximum = new decimal(new int[] { -1, -1, -1, 0 });
             nudSoLuong.Name = "nudSoLuong";
             nudSoLuong.Size = new Size(250, 30);
             nudSoLuong.TabIndex = 5;
-            nudSoLuong.Minimum = 0;
-            nudSoLuong.Maximum = decimal.MaxValue;
             // 
             // label3
             // 
@@ -425,6 +424,7 @@
             ForeColor = Color.Black;
             Name = "FormThongTinLo";
             Text = "Thông Tin Lô";
+            Load += FormThongTinLo_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nudSoLuong).EndInit();

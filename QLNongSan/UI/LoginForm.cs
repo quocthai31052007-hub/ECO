@@ -85,7 +85,7 @@ namespace QLNongSan.UI
             fKhachHang.ShowDialog();
 
 
-            this.Close();
+            this.Show();
         }
 
     }

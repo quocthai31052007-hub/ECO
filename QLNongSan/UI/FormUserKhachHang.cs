@@ -12,46 +12,36 @@ namespace QLNongSan.UI
     public partial class FormUserKhachHang : Form
     {
         private readonly Application application;
-        public FormUserKhachHang(
-            Application application
-        )
+        private string? currentLookupId = null;
+
+        public FormUserKhachHang(Application application)
         {
             this.application = application;
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void onInitQRExport(object sender, EventArgs e)
         {
-            try
+            if (currentLookupId == null)
             {
-
-                string thongTinKhachHang = "Mã SP:#AB72 - Nhà Sản xuất: Bùi Đức Dương - Tình trạng:Ổn định - Ngày sản xuất:6/1/2022";
-
-
-                QRCodeGenerator qrGenerator = new QRCodeGenerator();
-                QRCodeData qrCodeData = qrGenerator.CreateQrCode(thongTinKhachHang, QRCodeGenerator.ECCLevel.Q);
-                QRCode qrCode = new QRCode(qrCodeData);
-
-
-                Bitmap qrCodeImage = qrCode.GetGraphic(20);
-
-
-                using (SaveFileDialog sfd = new SaveFileDialog())
-                {
-                    sfd.Filter = "Image Files(*.png)|*.png";
-                    sfd.FileName = "MaQR_LoSP_001";
-
-                    if (sfd.ShowDialog() == DialogResult.OK)
-                    {
-                        qrCodeImage.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                        MessageBox.Show("Xuất mã QR thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
+                return;
             }
-            catch (Exception ex)
+            var fileDialog = new SaveFileDialog
             {
-                MessageBox.Show("Đã xảy ra lỗi khi tạo QR: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Filter = "*.png"
+            };
+            fileDialog.ShowDialog();
+            var fileName = fileDialog.FileName;
+            if (string.IsNullOrEmpty(fileName))
+            {
+                MessageBox.Show("Vui lòng chọn một file ảnh để xuất mã QR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+            var dict = new Dictionary<string, string>
+            {
+                { "id", currentLookupId }
+            };
+            this.application.lookupQRService.CreateQRFile(dict, fileName);
         }
 
         private void FormKhachHang_Load(object sender, EventArgs e)
@@ -59,9 +49,31 @@ namespace QLNongSan.UI
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void onLookupIdChange(string id)
+        { 
+            Console.WriteLine("Tra cứu thông tin với ID: " + id);
+            var data = application.batchRepository.GetById(id);
+            if (data == null) { 
+                MessageBox.Show("Không tìm thấy thông tin với ID đã nhập.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            currentLookupId = data!.MaLo;
+            // Hiển thị thông tin chi tiết của lô hàng
+            return;
+        }
+
+        private void onInitLookupClick(object sender, EventArgs e)
         {
-            
+            var form = new FormNhapTraCuu { application = this.application, onSubmit = (id) => {
+                this.onLookupIdChange(id);
+            } };
+            form.ShowDialog();
+        }
+
+
+        private void btnTroLai_Click(object sender, EventArgs e)
+        {
+
+            this.Close();
         }
     }
 }

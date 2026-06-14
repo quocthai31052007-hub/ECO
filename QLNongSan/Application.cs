@@ -13,5 +13,6 @@ namespace QLNongSan
         public required Repositories.BaoCaoDAL reportRepository;
         public required Repositories.NhanVienDAL employeeRepository;
         public required Databases.SQLServerFactory database;
+        public required QR.Services.IQRService lookupQRService;
     }
 }

@@ -185,21 +185,30 @@ namespace QLNongSan
             txbDonViNhap.Text = row.Cells["DonViNhap"].Value?.ToString() ?? "";
 
             var maKH = row.Cells["MaKH"].Value != null && row.Cells["MaKH"].Value != DBNull.Value ? row.Cells["MaKH"].Value : null;
-            if (maKH != null) {
+            if (maKH != null)
+            {
                 cmbMaKH.SelectedValue = maKH;
-            } else {
+            }
+            else
+            {
                 cmbMaKH.SelectedIndex = -1;
             }
             var maSP = row.Cells["MaSP"].Value != null && row.Cells["MaSP"].Value != DBNull.Value ? row.Cells["MaSP"].Value : null;
-            if (maSP != null) {
+            if (maSP != null)
+            {
                 cmbMaSP.SelectedValue = maSP;
-            } else {
+            }
+            else
+            {
                 cmbMaSP.SelectedIndex = -1;
             }
             var maPN = row.Cells["MaPN"].Value != null && row.Cells["MaPN"].Value != DBNull.Value ? row.Cells["MaPN"].Value : null;
-            if (maPN != null) {
+            if (maPN != null)
+            {
                 cmbMaPN.SelectedValue = maPN;
-            } else {
+            }
+            else
+            {
                 cmbMaPN.SelectedIndex = -1;
             }
 
@@ -318,7 +327,7 @@ namespace QLNongSan
             try
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                BindRowToForm(row);
+                BindRowToForm(row); 
             }
             catch (Exception ex)
             {
@@ -328,6 +337,11 @@ namespace QLNongSan
 
         private void cmbMaKH_SelectedIndexChanged(object sender, EventArgs e)
         {
+        }
+
+        private void FormThongTinLo_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

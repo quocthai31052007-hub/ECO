@@ -118,7 +118,7 @@ namespace QLNongSan.Repositories
 
             const string query = @"
                 UPDATE ThongTinLo SET
-                    SoLuong  = @SoLuong,
+                    SoLuongNhap = @SoLuong,
                     DonViNhap    = @DonViNhap,
                     MaKH     = @MaKH,
                     MaSP     = @MaSP,
@@ -127,7 +127,7 @@ namespace QLNongSan.Repositories
                     NgayNhap = @NgayNhap,
                     GhiChu   = @GhiChu,
                     NgayMua  = @NgayMua,
-                    LienHe   = @LienHe,
+                    ThongTinLienHe   = @LienHe,
                     TrangThai= @TrangThai
                 WHERE MaLo = @MaLo";
 

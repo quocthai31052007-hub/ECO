@@ -14,6 +14,11 @@ namespace QLNongSan
                 userName: "QuanLyNongSan",
                 password: "Qlns@123!"
             );
+            var lookupQRService = new QR.Services.QRService
+            {
+                basename = "qlns.app",
+                absolutePath = "/tra-cuu"
+            };
             var userRepository = new Authentication.Repositories.UserRepository
             {
                 factory = sqlServerFactory,
@@ -65,6 +70,7 @@ namespace QLNongSan
                 batchRepository = batchRepository,
                 reportRepository = reportRepository,
                 employeeRepository = employeeRepository,
+                lookupQRService = lookupQRService,
                 database = sqlServerFactory
             };
 
