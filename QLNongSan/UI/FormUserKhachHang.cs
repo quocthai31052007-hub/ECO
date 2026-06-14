@@ -22,26 +22,26 @@ namespace QLNongSan.UI
 
         private void onInitQRExport(object sender, EventArgs e)
         {
-            if (currentLookupId == null)
-            {
-                return;
-            }
-            var fileDialog = new SaveFileDialog
-            {
-                Filter = "*.png"
-            };
-            fileDialog.ShowDialog();
-            var fileName = fileDialog.FileName;
-            if (string.IsNullOrEmpty(fileName))
-            {
-                MessageBox.Show("Vui lòng chọn một file ảnh để xuất mã QR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            var dict = new Dictionary<string, string>
-            {
-                { "id", currentLookupId }
-            };
-            this.application.lookupQRService.CreateQRFile(dict, fileName);
+            //if (currentLookupId == null)
+            //{
+            //    return;
+            //}
+            //var fileDialog = new SaveFileDialog
+            //{
+            //    Filter = "*.png"
+            //};
+            //fileDialog.ShowDialog();
+            //var fileName = fileDialog.FileName;
+            //if (string.IsNullOrEmpty(fileName))
+            //{
+            //    MessageBox.Show("Vui lòng chọn một file ảnh để xuất mã QR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
+            //var dict = new Dictionary<string, string>
+            //{
+            //    { "id", currentLookupId }
+            //};
+            //this.application.lookupQRService.CreateQRFile(dict, fileName);
         }
 
         private void FormKhachHang_Load(object sender, EventArgs e)
@@ -51,21 +51,19 @@ namespace QLNongSan.UI
 
         private void onLookupIdChange(string id)
         { 
-            Console.WriteLine("Tra cứu thông tin với ID: " + id);
-            var data = application.batchRepository.GetById(id);
-            if (data == null) { 
-                MessageBox.Show("Không tìm thấy thông tin với ID đã nhập.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            currentLookupId = data!.MaLo;
-            // Hiển thị thông tin chi tiết của lô hàng
-            return;
+            //Console.WriteLine("Tra cứu thông tin với ID: " + id);
+            //var data = application.batchRepository.GetById(id);
+            //if (data == null) { 
+            //    MessageBox.Show("Không tìm thấy thông tin với ID đã nhập.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
+            //currentLookupId = data!.MaLo;
+            //// Hiển thị thông tin chi tiết của lô hàng
+            //return;
         }
 
         private void onInitLookupClick(object sender, EventArgs e)
         {
-            var form = new FormNhapTraCuu { application = this.application, onSubmit = (id) => {
-                this.onLookupIdChange(id);
-            } };
+            var form = new FormTraCuuLo(this.application);
             form.ShowDialog();
         }
 

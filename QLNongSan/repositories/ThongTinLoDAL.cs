@@ -62,22 +62,22 @@ namespace QLNongSan.Repositories
         // ─── CREATE ──────────────────────────────────────────────────────────
 
         /// <summary>Thêm một lô hàng mới vào cơ sở dữ liệu.</summary>
-        public void Insert(ThongTinLo lo)
+        public bool Insert(ThongTinLo lo)
         {
             using SqlConnection conn = factory.GetConnection();
             conn.Open();
 
             const string query = @"
                 INSERT INTO ThongTinLo
-                    (MaLo, SoLuong, DonViNhap, MaKH, MaSP, MaPN,
-                     TenLo, NgayNhap, GhiChu, NgayMua, LienHe, TrangThai)
+                    (MaLo, SoLuongNhap, DonViNhap, MaKH, MaSP, MaPN,
+                     TenLo, NgayNhap, GhiChu, NgayMua, ThongTinLienHe, TrangThai)
                 VALUES
                     (@MaLo, @SoLuong, @DonViNhap, @MaKH, @MaSP, @MaPN,
                      @TenLo, @NgayNhap, @GhiChu, @NgayMua, @LienHe, @TrangThai)";
 
             using SqlCommand cmd = new(query, conn);
             MapParameters(cmd, lo);
-            cmd.ExecuteNonQuery();
+            return cmd.ExecuteNonQuery() > 0;
         }
 
         public ThongTinLo? GetById(string maLo)
@@ -111,7 +111,7 @@ namespace QLNongSan.Repositories
         // ─── UPDATE ──────────────────────────────────────────────────────────
 
         /// <summary>Cập nhật thông tin lô hàng đã tồn tại.</summary>
-        public void Update(ThongTinLo lo)
+        public bool Update(ThongTinLo lo)
         {
             using SqlConnection conn = factory.GetConnection();
             conn.Open();
@@ -127,13 +127,13 @@ namespace QLNongSan.Repositories
                     NgayNhap = @NgayNhap,
                     GhiChu   = @GhiChu,
                     NgayMua  = @NgayMua,
-                    ThongTinLienHe   = @LienHe,
+                    ThongTinLienHe  = @LienHe,
                     TrangThai= @TrangThai
                 WHERE MaLo = @MaLo";
 
             using SqlCommand cmd = new(query, conn);
             MapParameters(cmd, lo);
-            cmd.ExecuteNonQuery();
+            return cmd.ExecuteNonQuery() > 0;
         }
 
         // ─── DELETE ──────────────────────────────────────────────────────────

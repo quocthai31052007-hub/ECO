@@ -29,24 +29,10 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormUserKhachHang));
-            button1 = new Button();
             button3 = new Button();
             button2 = new Button();
             button8 = new Button();
             SuspendLayout();
-            // 
-            // button1
-            // 
-            button1.BackColor = Color.White;
-            button1.Font = new Font("Segoe UI", 20F);
-            button1.ForeColor = Color.Navy;
-            button1.Location = new Point(1031, 38);
-            button1.Name = "button1";
-            button1.Size = new Size(225, 71);
-            button1.TabIndex = 0;
-            button1.Text = "Xuất mã QR";
-            button1.UseVisualStyleBackColor = false;
-            button1.Click += onInitQRExport;
             // 
             // button3
             // 
@@ -64,7 +50,7 @@
             // 
             button2.Font = new Font("Segoe UI", 20F);
             button2.ForeColor = Color.Navy;
-            button2.Location = new Point(742, 38);
+            button2.Location = new Point(1044, 38);
             button2.Name = "button2";
             button2.Size = new Size(202, 71);
             button2.TabIndex = 3;
@@ -76,7 +62,7 @@
             // 
             button8.Font = new Font("Segoe UI", 20F);
             button8.ForeColor = Color.Navy;
-            button8.Location = new Point(454, 38);
+            button8.Location = new Point(764, 38);
             button8.Name = "button8";
             button8.Size = new Size(156, 71);
             button8.TabIndex = 7;
@@ -94,7 +80,6 @@
             Controls.Add(button8);
             Controls.Add(button2);
             Controls.Add(button3);
-            Controls.Add(button1);
             DoubleBuffered = true;
             Name = "FormUserKhachHang";
             Text = "Form1";
@@ -105,7 +90,6 @@
         #endregion
 
         private Button button7;
-        private Button button1;
         private Button button2;
         private Button button3;
         private void btnDieuKhoan_Click(object sender, EventArgs e)

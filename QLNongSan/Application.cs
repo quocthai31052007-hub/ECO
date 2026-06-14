@@ -12,6 +12,7 @@ namespace QLNongSan
         public required Repositories.ThongTinLoDAL batchRepository;
         public required Repositories.BaoCaoDAL reportRepository;
         public required Repositories.NhanVienDAL employeeRepository;
+        public required Repositories.TraCuuLoDAL lookupRepository;
         public required Databases.SQLServerFactory database;
         public required QR.Services.IQRService lookupQRService;
     }

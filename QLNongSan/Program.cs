@@ -55,6 +55,10 @@ namespace QLNongSan
             {
                 factory = sqlServerFactory,
             };
+            var lookupRepository = new Repositories.TraCuuLoDAL
+            {
+                factory = sqlServerFactory,
+            };  
             var authenticationService = new Authentication.Services.AuthenticationService
             {
                 userRepository = userRepository
@@ -71,6 +75,7 @@ namespace QLNongSan
                 reportRepository = reportRepository,
                 employeeRepository = employeeRepository,
                 lookupQRService = lookupQRService,
+                lookupRepository = lookupRepository,
                 database = sqlServerFactory
             };
 

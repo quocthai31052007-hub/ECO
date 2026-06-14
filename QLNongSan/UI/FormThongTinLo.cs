@@ -238,7 +238,7 @@ namespace QLNongSan
         {
             isAdding = true;
             XoaTrang();
-            txbMaLo.Focus();
+            txbMaLo.Enabled = true;
         }
 
         private void btnHuy_Click(object sender, EventArgs e)
@@ -256,7 +256,7 @@ namespace QLNongSan
             }
 
             isAdding = false;
-            txbTenLo.Focus();
+            txbTenLo.Enabled = false;
         }
 
         private void btnXoa_Click(object sender, EventArgs e)
@@ -293,20 +293,27 @@ namespace QLNongSan
             try
             {
                 ThongTinLo lo = GetDataFromForm();
+                bool ketQua = false;
 
                 if (isAdding)
                 {
-                    dal.Insert(lo);
+                    ketQua = dal.Insert(lo);
                 }
                 else
                 {
-                    dal.Update(lo);
+                    ketQua = dal.Update(lo);
                 }
-
-                MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo");
-                isAdding = false;
-                XoaTrang();
-                LoadData();
+                if (ketQua == true)
+                {
+                    MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    isAdding = false;
+                    XoaTrang();
+                    LoadData(); 
+                }
+                else
+                {
+                    MessageBox.Show("Lưu thất bại! Vui lòng kiểm tra lại (có thể trùng Mã lô).", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
             catch (Exception ex)
             {

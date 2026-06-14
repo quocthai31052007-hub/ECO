@@ -35,7 +35,7 @@
             // button1
             // 
             button1.Font = new Font("Segoe UI", 15F);
-            button1.Location = new Point(136, 163);
+            button1.Location = new Point(237, 254);
             button1.Name = "button1";
             button1.Size = new Size(257, 122);
             button1.TabIndex = 0;
@@ -45,9 +45,9 @@
             // 
             // idInput
             // 
-            idInput.Location = new Point(121, 67);
+            idInput.Location = new Point(237, 94);
             idInput.Name = "idInput";
-            idInput.Size = new Size(125, 27);
+            idInput.Size = new Size(257, 27);
             idInput.TabIndex = 1;
             // 
             // FormNhapTraCuu
